@@ -1,4 +1,4 @@
-const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxEVsrI0WIDAJvvhZwMMnUC3MzPHJ9rlm3SuzClCemhLSok4IrOyHDiz7Gb6eSXqdaecQ/exec';
+const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbym4rVEUWd0xkp9JglZNkZp6Hse6IxGSkHgqqKsi05GJhwe2AD95Z1-bGCv7dhWMLBqXQ/exec';
 
 let productsData = [];
 let inventoryProductsData = []; // ✅ سطر جديد لمنتجات الجرد
