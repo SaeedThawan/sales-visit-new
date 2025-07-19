@@ -1,0 +1,379 @@
+[
+  {
+    "Product_Name_AR": "شوكولاته اجلو بالو كرسبيس",
+    "Product_Code": "0501000",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "17",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاتة بالو ٣ أصابع افكو",
+    "Product_Code": "0501003",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "18.5",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاتة اجلو بالو كراميل كرسب ٢ أصابع",
+    "Product_Code": "0501002",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "20",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاته اجلو كينج بار نوجا",
+    "Product_Code": "0501035",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "18",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "ويفروو اجلو بار بالو كريمه الشوكلاته",
+    "Product_Code": "0501004",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "20",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "ويفروو اجلو بار بالو كريمه البندق",
+    "Product_Code": "0501013",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "20",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاته اجلو يمي اكستريم",
+    "Product_Code": "0501010",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "20",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "اجلو ابولو لوح رقائق الأرز بالكاكاو مغلف بالشوكو",
+    "Product_Code": "0501111",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "16",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "اجلو ابولو لوح رقائق الأرز مغلف بالشوكو",
+    "Product_Code": "0501110",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "16",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "اجلو مونتز ويفر مقرمش مغطى بالشوكولاتة",
+    "Product_Code": "0501017",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "20",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاته اجلو جولد بار كرسبي",
+    "Product_Code": "0501022",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "15",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاته اجلو جولد بار فول سوداني",
+    "Product_Code": "0501023",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "18",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاته اجلو جولد بار شوكولاته",
+    "Product_Code": "0501021",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "18",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "اجلو لاغون جوز الهند مغطي بالشوكولاته",
+    "Product_Code": "0501012",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "18",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "ويفروو اجلو بالو اصابع بكريمة البندق",
+    "Product_Code": "0501011",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "25",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "لاغون جوز الهند المغطي شوكولاتة أكياس",
+    "Product_Code": "501071",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "كيس",
+    "Unit_Size": "180",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "شوكولاته اجلو يميي",
+    "Product_Code": "0501007",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "20",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "أجلو مارك أب بالبندق أضافي 35%",
+    "Product_Code": "0501049",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "12",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "اجلو شوكولاته ايفنز محشوة بالحليب",
+    "Product_Code": "0501015",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "13",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "اجلو شوكو لافا",
+    "Product_Code": "0501016",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "12.5",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "اجلو كاسا روزا شوكولاته مشكله",
+    "Product_Code": "0501071",
+    "Category": "حلويات وشوكولاتة",
+    "Package_Type": "عبوة",
+    "Unit_Size": "1",
+    "Unit_Label": "كيلو"
+  },
+  {
+    "Product_Name_AR": "مزيج كريمة المخفوقة تيارا",
+    "Product_Code": "1001052",
+    "Category": "مكونات حلويات/خبز",
+    "Package_Type": "عبوة",
+    "Unit_Size": "72",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "كريم كراميل تيارا",
+    "Product_Code": "1001022",
+    "Category": "مكونات حلويات/خبز",
+    "Package_Type": "عبوة",
+    "Unit_Size": "71",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "حلوى الجيلي نكهة الفراولة تيارا",
+    "Product_Code": "1001012",
+    "Category": "مكونات حلويات/خبز",
+    "Package_Type": "عبوة",
+    "Unit_Size": "85",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "مسحوق الكاسترد تيارا",
+    "Product_Code": "1001041",
+    "Category": "مكونات حلويات/خبز",
+    "Package_Type": "عبوة",
+    "Unit_Size": "300",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "نكهة طهي فانيللا تيارا فانيلا",
+    "Product_Code": "1001072",
+    "Category": "مكونات حلويات/خبز",
+    "Package_Type": "عبوة",
+    "Unit_Size": "28",
+    "Unit_Label": "مل"
+  },
+  {
+    "Product_Name_AR": "باكينغ باودر تيارا",
+    "Product_Code": "1001061",
+    "Category": "مكونات حلويات/خبز",
+    "Package_Type": "عبوة",
+    "Unit_Size": "110",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت بكريمة بيكاديللي فانيليا",
+    "Product_Code": "0505038",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "16",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت بكريمة بيكاديللي شوكلاتة",
+    "Product_Code": "0505036",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "16",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت بكريمة بيكاديللي برتقال",
+    "Product_Code": "0505039",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "16",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت بكريمة بيكاديللي جوز الهند",
+    "Product_Code": "0505037",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "16",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت نايس بيكاديللي نايس",
+    "Product_Code": "0505047",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "40",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت جلوكوز بالحليب والعسل",
+    "Product_Code": "0505046",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "40",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت نخالة ديجستف بيكاديلي",
+    "Product_Code": "0505067",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "175",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت ديجستف بيكاديلي مغطاة بالشكولاتة",
+    "Product_Code": "0505073",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "20",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت ديجستف اصابع مغطاة بالشكولاتة",
+    "Product_Code": "0501075",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "28",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت رامبو بيكاديللي فراولة",
+    "Product_Code": "505057",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "30",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت كريمولينو بيكاديللي",
+    "Product_Code": "505021",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "30",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بسكويت رامبو بيكاديللي شوكلاته",
+    "Product_Code": "505056",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "30",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "سبلاش بسكويت مغطى بالشوكلاته توين",
+    "Product_Code": "505087",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "16",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "سبلاش بسكويت نصف مغلف بالشوكلاته",
+    "Product_Code": "505088",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "22",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "سبلاش بسكويت مغطى بالشوكلاته",
+    "Product_Code": "505086",
+    "Category": "بسكويت",
+    "Package_Type": "عبوة",
+    "Unit_Size": "18",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "فاصوليا حمراء فايف ستار مع مفتاح",
+    "Product_Code": "0201011",
+    "Category": "معلبات",
+    "Package_Type": "علبة",
+    "Unit_Size": "400",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "بازلاء فايف ستار",
+    "Product_Code": "0201007",
+    "Category": "معلبات",
+    "Package_Type": "علبة",
+    "Unit_Size": "400",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "فول فايف ستار درجة اولى ابو مفتاح",
+    "Product_Code": "0201002",
+    "Category": "معلبات",
+    "Package_Type": "علبة",
+    "Unit_Size": "400",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "فاصوليا بيضاء فايف ستار مع مفتاح",
+    "Product_Code": "0201018",
+    "Category": "معلبات",
+    "Package_Type": "علبة",
+    "Unit_Size": "400",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "حليب مبخر فايف ستار",
+    "Product_Code": "0202008",
+    "Category": "ألبان ومعلبات",
+    "Package_Type": "علبة",
+    "Unit_Size": "170",
+    "Unit_Label": "جرام"
+  },
+  {
+    "Product_Name_AR": "فاصوليا بيضاء بصلصة الطماطم فايف ستار مع مفتاح",
