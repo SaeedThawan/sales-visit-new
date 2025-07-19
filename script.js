@@ -1,313 +1,333 @@
-const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbym4rVEUWd0xkp9JglZNkZp6Hse6IxGSkHgqqKsi05GJhwe2AD95Z1-bGCv7dhWMLBqXQ/exec';
+document.addEventListener('DOMContentLoaded', async () => {
+  const form = document.getElementById('visitForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const buttonText = document.getElementById('buttonText');
+  const loadingSpinner = document.getElementById('loadingSpinner');
 
-let productsData = [];
-let inventoryProductsData = []; // ✅ سطر جديد لمنتجات الجرد
-let salesRepresentatives = [];
-let customersMain = [];
-let visitOutcomes = [];
-let visitPurposes = [];
-let visitTypes = [];
+  const salesRepSelect = document.getElementById('salesRepName');
+  const customerNameInput = document.getElementById('customerName');
+  const customerListDatalist = document.getElementById('customerList');
+  const customerCodeInput = document.getElementById('customerCode');
+  const visitTypeSelect = document.getElementById('visitType');
+  const visitPurposeSelect = document.getElementById('visitPurpose');
+  const visitOutcomeSelect = document.getElementById('visitOutcome');
+  const visitDateInput = document.getElementById('visitDate');
+  const visitTimeInput = document.getElementById('visitTime');
+  const notesTextarea = document.getElementById('notes');
+  const entryUserNameInput = document.getElementById('entryUserName');
 
-const visitForm = document.getElementById('visitForm');
-const salesRepNameSelect = document.getElementById('salesRepName');
-const customerNameInput = document.getElementById('customerName');
-const customerListDatalist = document.getElementById('customerList');
-const visitTypeSelect = document.getElementById('visitType');
-const visitPurposeSelect = document.getElementById('visitPurpose');
-const visitOutcomeSelect = document.getElementById('visitOutcome');
-const productCategoriesDiv = document.getElementById('productCategories');
-const productsDisplayDiv = document.getElementById('productsDisplay');
-const submitBtn = document.getElementById('submitBtn');
-const loadingSpinner = document.getElementById('loadingSpinner');
+  const productSelectionSection = document.getElementById('productSelectionSection');
+  const productCategoriesDiv = document.getElementById('productCategories');
+  const productsDisplayDiv = document.getElementById('productsDisplay');
 
-// ✅ SweetAlert بدل showMessageBox
-function showSuccessMessage() {
-  Swal.fire({
-    title: '✅ تم الإرسال!',
-    text: 'تم إرسال النموذج بنجاح.',
-    icon: 'success',
-    confirmButtonText: 'ممتاز'
-  });
-}
+  const inventorySection = document.getElementById('inventorySection');
+  const inventoryProductNameInput = document.getElementById('inventoryProductName');
+  const inventoryProductListDatalist = document.getElementById('inventoryProductList');
+  const inventoryProductCodeInput = document.getElementById('inventoryProductCode');
+  const inventoryCategoryInput = document.getElementById('inventoryCategory');
+  const inventoryPackageTypeInput = document.getElementById('inventoryPackageType');
+  const inventoryUnitSizeInput = document.getElementById('inventoryUnitSize');
+  const inventoryUnitLabelInput = document.getElementById('inventoryUnitLabel');
+  const inventoryQuantityInput = document.getElementById('inventoryQuantity');
+  const inventoryExpirationDateInput = document.getElementById('inventoryExpirationDate');
 
-function showErrorMessage(message) {
-  Swal.fire({
-    title: '❌ خطأ!',
-    text: message,
-    icon: 'error',
-    confirmButtonText: 'حسناً'
-  });
-}
+  let salesReps = [];
+  let customers = [];
+  let visitTypes = [];
+  let visitPurposes = [];
+  let visitOutcomes = [];
+  let products = [];
+  let inventoryProducts = [];
+  let selectedProducts = {};
 
-// ✅ تحميل البيانات من ملفات JSON
-async function fetchData() {
-  try {
-    const [
-      productsResponse,
-      inventoryProductsResponse, // ✅ سطر جديد
-      salesRepResponse,
-      customersResponse,
-      visitOutcomesResponse,
-      visitPurposesResponse,
-      visitTypesResponse
-    ] = await Promise.all([
-      fetch('products.json'),
-      fetch('inventory_products.json'), // ✅ سطر جديد
-      fetch('sales_representatives.json'),
-      fetch('customers_main.json'),
-      fetch('visit_outcomes.json'),
-      fetch('visit_purposes.json'),
-      fetch('visit_types.json')
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbym4rVEUWd0xkp9JglZNkZp6Hse6IxGSkHgqqKsi05GJhwe2AD95Z1-bGCv7dhWMLBqXQ/exec';
+
+  async function fetchData(url) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error(`Could not fetch data from ${url}:`, error);
+      Swal.fire({ icon: 'error', title: 'خطأ في التحميل', text: `تعذر تحميل البيانات من ${url}` });
+      return [];
+    }
+  }
+
+  async function loadAllData() {
+    [salesReps, customers, visitTypes, visitPurposes, visitOutcomes, products, inventoryProducts] = await Promise.all([
+      fetchData('sales_representatives.json'),
+      fetchData('customers_main.json'),
+      fetchData('visit_types.json'),
+      fetchData('visit_purposes.json'),
+      fetchData('visit_outcomes.json'),
+      fetchData('products.json'),
+      fetchData('inventory_products.json')
     ]);
 
-    productsData = await productsResponse.json();
-    inventoryProductsData = await inventoryProductsResponse.json(); // ✅ سطر جديد
-    salesRepresentatives = await salesRepResponse.json();
-    customersMain = await customersResponse.json();
-    visitOutcomes = await visitOutcomesResponse.json();
-    visitPurposes = await visitPurposesResponse.json();
-    visitTypes = await visitTypesResponse.json();
-
-    populateSalesRepresentatives();
+    populateSalesReps();
+    populateCustomers();
     populateVisitTypes();
     populateVisitPurposes();
     populateVisitOutcomes();
-    populateCustomerList();
-    // لا تقم باستدعاء populateProducts هنا بعد الآن، سيتم استدعاؤها بناءً على تغيير نوع الزيارة
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    showErrorMessage('حدث خطأ أثناء تحميل البيانات الأساسية. يرجى إعادة تحميل الصفحة.');
-  } finally {
-    loadingSpinner.style.display = 'none'; // إخفاء السبينر بعد التحميل
-    submitBtn.disabled = false; // تفعيل زر الإرسال
-  }
-}
-
-// ✅ تعبئة قائمة المندوبين
-function populateSalesRepresentatives() {
-  salesRepNameSelect.innerHTML = '<option value="">اختر المندوب</option>';
-  salesRepresentatives.forEach(rep => {
-    const option = document.createElement('option');
-    option.value = rep;
-    option.textContent = rep;
-    salesRepNameSelect.appendChild(option);
-  });
-}
-
-// ✅ تعبئة قائمة أنواع الزيارة
-function populateVisitTypes() {
-  visitTypeSelect.innerHTML = '<option value="">اختر نوع الزيارة</option>';
-  visitTypes.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type.Visit_Type_Name_AR;
-    option.textContent = type.Visit_Type_Name_AR;
-    visitTypeSelect.appendChild(option);
-  });
-}
-
-// ✅ تعبئة قائمة أهداف الزيارة
-function populateVisitPurposes() {
-  visitPurposeSelect.innerHTML = '<option value="">اختر هدف الزيارة</option>';
-  visitPurposes.forEach(purpose => {
-    const option = document.createElement('option');
-    option.value = purpose;
-    option.textContent = purpose;
-    visitPurposeSelect.appendChild(option);
-  });
-}
-
-// ✅ تعبئة قائمة نتائج الزيارة
-function populateVisitOutcomes() {
-  visitOutcomeSelect.innerHTML = '<option value="">اختر نتيجة الزيارة</option>';
-  visitOutcomes.forEach(outcome => {
-    const option = document.createElement('option');
-    option.value = outcome;
-    option.textContent = outcome;
-    visitOutcomeSelect.appendChild(option);
-  });
-}
-
-// ✅ تعبئة قائمة العملاء في الداتاليست
-function populateCustomerList() {
-  customerListDatalist.innerHTML = ''; // مسح القائمة الموجودة
-  customersMain.forEach(customer => {
-    const option = document.createElement('option');
-    option.value = customer.Customer_Name_AR;
-    customerListDatalist.appendChild(option);
-  });
-}
-
-// ✅ تعبئة المنتجات بناءً على نوع الزيارة المختار
-function populateProducts() {
-  productsDisplayDiv.innerHTML = ''; // مسح المنتجات المعروضة حاليا
-  productCategoriesDiv.innerHTML = ''; // مسح الفئات المعروضة حاليا
-
-  const selectedVisitType = visitTypeSelect.value;
-  let currentProducts = [];
-
-  // تحديد مصدر المنتجات بناءً على نوع الزيارة
-  if (selectedVisitType === "جرد استثنائي") {
-    currentProducts = inventoryProductsData; // استخدام بيانات منتجات الجرد
-  } else {
-    currentProducts = productsData; // استخدام بيانات المنتجات العادية
+    populateProductCategories();
+    populateInventoryProducts();
   }
 
-  if (currentProducts.length === 0) {
-    productsDisplayDiv.innerHTML = '<p class="text-gray-500 text-center">لا توجد منتجات لعرضها لهذا النوع من الزيارة.</p>';
-    return;
-  }
-
-  // جمع الفئات الفريدة من قائمة المنتجات المختارة حاليًا
-  const categories = [...new Set(currentProducts.map(p => p.Category))].sort();
-
-  // إنشاء أزرار الفئات
-  categories.forEach(category => {
-    const radioBtn = document.createElement('input');
-    radioBtn.type = 'radio';
-    radioBtn.name = 'productCategory';
-    radioBtn.id = `category-${category.replace(/\s+/g, '-')}`;
-    radioBtn.value = category;
-    radioBtn.className = 'hidden peer';
-
-    const label = document.createElement('label');
-    label.htmlFor = `category-${category.replace(/\s+/g, '-')}`;
-    label.className = 'category-button';
-    label.textContent = category;
-
-    productCategoriesDiv.appendChild(radioBtn);
-    productCategoriesDiv.appendChild(label);
-
-    radioBtn.addEventListener('change', () => {
-      // تمرير قائمة المنتجات الصحيحة للدالة displayProductsByCategory
-      displayProductsByCategory(category, currentProducts);
+  function populateSalesReps() {
+    salesReps.forEach(rep => {
+      const option = document.createElement('option');
+      option.value = rep.Sales_Rep_Name_AR;
+      option.textContent = rep.Sales_Rep_Name_AR;
+      salesRepSelect.appendChild(option);
     });
-  });
-
-  // عرض المنتجات الافتراضية للفئة الأولى عند التحميل/التغيير
-  if (categories.length > 0) {
-    const firstCategoryRadio = document.getElementById(`category-${categories[0].replace(/\s+/g, '-')}`);
-    if (firstCategoryRadio) {
-      firstCategoryRadio.checked = true;
-      displayProductsByCategory(categories[0], currentProducts);
-    }
   }
-}
 
-// ✅ عرض المنتجات حسب الفئة
-function displayProductsByCategory(selectedCategory, productsList) { // ✅ أضف productsList هنا
-  productsDisplayDiv.innerHTML = '';
-  // استخدم productsList بدلاً من productsData
-  const filteredProducts = productsList.filter(p => p.Category === selectedCategory); // ✅ تعديل هنا
+  function populateCustomers() {
+    customerListDatalist.innerHTML = '';
+    customers.forEach(customer => {
+      const option = document.createElement('option');
+      option.value = customer.Customer_Name_AR;
+      customerListDatalist.appendChild(option);
+    });
+  }
 
-  filteredProducts.forEach(product => {
-    const productDiv = document.createElement('div');
-    productDiv.className = 'product-item bg-white p-4 rounded-lg shadow-sm flex items-center justify-between border border-gray-200';
-    productDiv.innerHTML = `
-      <label class="text-gray-800 font-medium text-right flex-grow">${product.Product_Name_AR}</label>
-      <div class="radio-group flex space-x-4 space-x-reverse">
-        <label class="inline-flex items-center">
-          <input type="radio" name="product_${product.Product_Name_AR.replace(/\s+/g, '_')}" value="متوفر" class="form-radio text-green-600 h-4 w-4" checked>
-          <span class="mr-2 text-green-700">متوفر</span>
-        </label>
-        <label class="inline-flex items-center">
-          <input type="radio" name="product_${product.Product_Name_AR.replace(/\s+/g, '_')}" value="غير متوفر" class="form-radio text-red-600 h-4 w-4">
-          <span class="mr-2 text-red-700">غير متوفر</span>
-        </label>
-      </div>
-    `;
-    productsDisplayDiv.appendChild(productDiv);
+  function populateVisitTypes() {
+    visitTypes.forEach(type => {
+      const option = document.createElement('option');
+      option.value = type.Visit_Type_Name_AR;
+      option.textContent = type.Visit_Type_Name_AR;
+      visitTypeSelect.appendChild(option);
+    });
+  }
+
+  function populateVisitPurposes() {
+    visitPurposes.forEach(purpose => {
+      const option = document.createElement('option');
+      option.value = purpose.Visit_Purpose_Name_AR;
+      option.textContent = purpose.Visit_Purpose_Name_AR;
+      visitPurposeSelect.appendChild(option);
+    });
+  }
+
+  function populateVisitOutcomes() {
+    visitOutcomes.forEach(outcome => {
+      const option = document.createElement('option');
+      option.value = outcome.Visit_Outcome_Name_AR;
+      option.textContent = outcome.Visit_Outcome_Name_AR;
+      visitOutcomeSelect.appendChild(option);
+    });
+  }
+
+  function populateProductCategories() {
+    productCategoriesDiv.innerHTML = '';
+    const categories = [...new Set(products.map(p => p.Category))];
+    categories.forEach(category => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'category-btn px-4 py-2 rounded-md bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors';
+      button.textContent = category;
+      button.dataset.category = category;
+      productCategoriesDiv.appendChild(button);
+    });
+  }
+
+  function populateInventoryProducts() {
+    inventoryProductListDatalist.innerHTML = '';
+    inventoryProducts.forEach(product => {
+      const option = document.createElement('option');
+      option.value = product.Product_Name_AR;
+      inventoryProductListDatalist.appendChild(option);
+    });
+  }
+
+  // ✅ نهاية المرحلة الأولى - التحميل والتعبئة
+  // ✅ تحديث كود العميل عند اختيار اسم العميل
+  customerNameInput.addEventListener('input', () => {
+    const selectedCustomerName = customerNameInput.value;
+    const customer = customers.find(c => c.Customer_Name_AR === selectedCustomerName);
+    customerCodeInput.value = customer ? customer.Customer_Code : '';
   });
-}
 
-// ✅ توليد Visit ID فريد
-function generateVisitID() {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 10000);
-  return `VISIT-${timestamp}-${random}`;
-}
-
-// ✅ تنسيق الوقت والتاريخ
-function formatTimestamp(date) {
-  const pad = (num) => num < 10 ? '0' + num : num;
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
-
-// ✅ معالجة إرسال النموذج
-visitForm.addEventListener('submit', async (event) => {
-  event.preventDefault(); // منع الإرسال الافتراضي
-
-  // إظهار سبينر التحميل وتعطيل الزر
-  submitBtn.disabled = true;
-  loadingSpinner.style.display = 'inline-block';
-
-  const now = new Date();
-  const formData = new FormData(visitForm);
-
-  const dataToSubmit = {
-    Visit_ID: generateVisitID(),
-    Customer_Name_AR: formData.get('Customer_Name_AR'),
-    Sales_Rep_Name_AR: formData.get('Sales_Rep_Name_AR'),
-    Visit_Date: now.toLocaleDateString('en-CA'), // YYYY-MM-DD
-    Visit_Time: now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }), // HH:MM:SS
-    Visit_Purpose: formData.get('Visit_Purpose'),
-    Visit_Outcome: formData.get('Visit_Outcome'),
-    Visit_Type_Name_AR: formData.get('Visit_Type_Name_AR'),
-    Entry_User_Name: formData.get('Entry_User_Name'),
-    Timestamp: formatTimestamp(now),
-    Customer_Type: formData.get('Customer_Type'),
-    Notes: formData.get('Notes') || ''
-  };
-
-  const available = [], unavailable = [];
-  const items = productsDisplayDiv.querySelectorAll('.product-item');
-  items.forEach(div => {
-    const name = div.querySelector('label').textContent;
-    const selected = div.querySelector('input[type="radio"]:checked');
-    if (selected) {
-      selected.value === 'متوفر' ? available.push(name) : unavailable.push(name);
+  // ✅ إظهار/إخفاء أقسام المنتجات حسب نوع الزيارة
+  visitTypeSelect.addEventListener('change', () => {
+    const selectedVisitType = visitTypeSelect.value;
+    if (selectedVisitType === 'جرد استثنائي') {
+      productSelectionSection.style.display = 'none';
+      inventorySection.style.display = 'block';
+      productsDisplayDiv.innerHTML = '';
+      selectedProducts = {};
+    } else {
+      productSelectionSection.style.display = 'block';
+      inventorySection.style.display = 'none';
+      clearInventoryFields();
     }
   });
 
-  dataToSubmit.Available_Products_Names = available.join(', ');
-  dataToSubmit.Unavailable_Products_Names = unavailable.join(', ');
+  function clearInventoryFields() {
+    inventoryProductNameInput.value = '';
+    inventoryProductCodeInput.value = '';
+    inventoryCategoryInput.value = '';
+    inventoryPackageTypeInput.value = '';
+    inventoryUnitSizeInput.value = '';
+    inventoryUnitLabelInput.value = '';
+    inventoryQuantityInput.value = '';
+    inventoryExpirationDateInput.value = '';
+  }
 
-  try {
-    const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
-      method: 'POST',
-      mode: 'no-cors', // مهم جداً لـ Google Apps Script
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(dataToSubmit),
-    });
+  // ✅ تعبئة تفاصيل المنتج بمجرد اختياره في قسم الجرد
+  inventoryProductNameInput.addEventListener('input', () => {
+    const selectedProductName = inventoryProductNameInput.value;
+    const product = inventoryProducts.find(p => p.Product_Name_AR === selectedProductName);
+    if (product) {
+      inventoryProductCodeInput.value = product.Product_Code || '';
+      inventoryCategoryInput.value = product.Category || '';
+      inventoryPackageTypeInput.value = product.Package_Type || '';
+      inventoryUnitSizeInput.value = product.Unit_Size || '';
+      inventoryUnitLabelInput.value = product.Unit_Label || '';
+    } else {
+      clearInventoryFields();
+      inventoryProductNameInput.value = selectedProductName;
+    }
+  });
 
-    // لا يمكننا التحقق من response.ok أو response.json() مع 'no-cors'
-    // نفترض النجاح ونعرض رسالة نجاح
-    showSuccessMessage();
-    visitForm.reset();
+  // ✅ عرض المنتجات حسب التصنيف
+  productCategoriesDiv.addEventListener('click', (event) => {
+    if (event.target.classList.contains('category-btn')) {
+      const category = event.target.dataset.category;
+      displayProductsByCategory(category);
+    }
+  });
+
+  function displayProductsByCategory(category) {
     productsDisplayDiv.innerHTML = '';
-    productCategoriesDiv.innerHTML = ''; // ✅ مسح أزرار الفئات بعد الإرسال
-    // إعادة تعبئة المنتجات بعد إعادة تعيين النموذج (يعتمد على نوع الزيارة الافتراضي)
-    populateProducts(); // ✅ إعادة تعبئة المنتجات
-    
-  } catch (error) {
-    console.error('فشل الإرسال:', error);
-    showErrorMessage('حدث خطأ أثناء إرسال البيانات. حاول مرة أخرى.');
-  } finally {
-    submitBtn.disabled = false;
-    loadingSpinner.style.display = 'none';
+    const filteredProducts = products.filter(p => p.Category === category);
+
+    filteredProducts.forEach(product => {
+      const productDiv = document.createElement('div');
+      productDiv.className = 'product-item p-4 border rounded-md flex items-center justify-between';
+      productDiv.innerHTML = `
+        <span class="font-medium">${product.Product_Name_AR}</span>
+        <div class="flex items-center space-x-2 space-x-reverse">
+          <input type="checkbox" id="product-${product.Product_Code}" value="${product.Product_Name_AR}" data-code="${product.Product_Code}" class="product-checkbox form-checkbox h-5 w-5 text-blue-600 rounded" ${selectedProducts[product.Product_Code] ? 'checked' : ''}>
+          <label for="product-${product.Product_Code}" class="text-gray-700">متوفر</label>
+        </div>
+      `;
+      productsDisplayDiv.appendChild(productDiv);
+
+      const checkbox = productDiv.querySelector(`#product-${product.Product_Code}`);
+      checkbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          selectedProducts[product.Product_Code] = product.Product_Name_AR;
+        } else {
+          delete selectedProducts[product.Product_Code];
+        }
+      });
+    });
   }
-});
 
-// ✅ عند تغيير نوع الزيارة، قم بتحديث قائمة المنتجات
-visitTypeSelect.addEventListener('change', () => {
-  populateProducts();
-});
+  // ✅ نهاية المرحلة الثانية - الأحداث ومعالجة الجرد
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
+    buttonText.style.display = 'none';
+    loadingSpinner.style.display = 'inline-block';
+    submitBtn.disabled = true;
 
-// ✅ استدعاء fetchData عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-  fetchData();
-  // تأكد من تعبئة المنتجات عند التحميل الأولي (بناءً على القيمة الافتراضية لنوع الزيارة)
-  populateProducts();
+    try {
+      const formData = new FormData(form);
+      const data = {};
+      for (let [key, value] of formData.entries()) {
+        data[key] = value;
+      }
+
+      data.Timestamp = new Date().toLocaleString('ar-SA', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      }).replace(/\u200F/g, '');
+
+      data.Customer_Type = ''; // عدّل إذا أضفت الحقل فعليًا للواجهة
+
+      if (data.Visit_Type_Name_AR === 'جرد استثنائي') {
+        data.Inventory_ID = `INVENTORY-${Date.now()}`;
+        data.Product_Name_AR = inventoryProductNameInput.value;
+        data.Product_Code = inventoryProductCodeInput.value;
+        data.Quantity = inventoryQuantityInput.value;
+        data.Expiration_Date = inventoryExpirationDateInput.value;
+        data.Category = inventoryCategoryInput.value;
+        data.Package_Type = inventoryPackageTypeInput.value;
+        data.Unit_Size = inventoryUnitSizeInput.value;
+        data.Unit_Label = inventoryUnitLabelInput.value;
+        data.Customer_Code = customerCodeInput.value;
+
+        delete data.Visit_ID;
+        delete data.Visit_Purpose;
+        delete data.Visit_Outcome;
+        delete data.Available_Products_Names;
+        delete data.Unavailable_Products_Names;
+      } else {
+        data.Visit_ID = `VISIT-${Date.now()}`;
+        const allProducts = products.map(p => p.Product_Code);
+        const availableProductCodes = Object.keys(selectedProducts);
+        const unavailableProductCodes = allProducts.filter(code => !availableProductCodes.includes(code));
+
+        data.Available_Products_Names = availableProductCodes.map(code => {
+          const product = products.find(p => p.Product_Code === code);
+          return product ? product.Product_Name_AR : '';
+        }).filter(name => name !== '').join(', ');
+
+        data.Unavailable_Products_Names = unavailableProductCodes.map(code => {
+          const product = products.find(p => p.Product_Code === code);
+          return product ? product.Product_Name_AR : '';
+        }).filter(name => name !== '').join(', ');
+
+        delete data.Inventory_ID;
+        delete data.Product_Name_AR;
+        delete data.Product_Code;
+        delete data.Quantity;
+        delete data.Expiration_Date;
+        delete data.Category;
+        delete data.Package_Type;
+        delete data.Unit_Size;
+        delete data.Unit_Label;
+      }
+
+      const response = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        Swal.fire({ icon: 'success', title: 'تم الإرسال بنجاح!', text: 'تم تسجيل البيانات بنجاح.' });
+        form.reset();
+        customerCodeInput.value = '';
+        clearInventoryFields();
+        productsDisplayDiv.innerHTML = '';
+        selectedProducts = {};
+        productSelectionSection.style.display = 'block';
+        inventorySection.style.display = 'none';
+        visitTypeSelect.value = '';
+      } else {
+        throw new Error(result.error || 'خطأ غير معروف في الخادم.');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      Swal.fire({ icon: 'error', title: 'خطأ في الإرسال!', text: `حدث خطأ أثناء إرسال البيانات: ${error.message}` });
+    } finally {
+      buttonText.style.display = 'inline-block';
+      loadingSpinner.style.display = 'none';
+      submitBtn.disabled = false;
+    }
+  });
+
+  // ✅ التهيئة النهائية عند تحميل الصفحة
+  loadAllData();
+  const now = new Date();
+  visitDateInput.value = now.toISOString().split('T')[0];
+  visitTimeInput.value = now.toTimeString().split(' ')[0].substring(0, 5);
 });
