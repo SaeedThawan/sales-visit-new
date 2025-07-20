@@ -87,14 +87,15 @@
       <div id="inventorySection" class="bg-yellow-50 p-6 rounded-xl border border-yellow-300 hidden">
         <h2 class="text-xl font-bold text-yellow-800 mb-4">قسم الجرد الاستثنائي</h2>
         
+        <datalist id="inventoryList">
+            </datalist>
+
         <div id="inventoryItemsContainer" class="space-y-4">
           <div class="inventory-item border border-yellow-200 p-4 rounded-lg bg-white relative">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-group">
                 <label>البحث عن المنتج</label>
                 <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." required />
-                <datalist id="inventoryList">
-                  </datalist>
               </div>
               <div class="form-group">
                 <label>الكمية</label>
