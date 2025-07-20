@@ -30,77 +30,44 @@
           </select>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="form-group">
-          <label for="customerName">اسم العميل</label>
-          <input
-            type="text"
-            id="customerName"
-            name="Customer_Name_AR"
-            class="mt-1"
-            list="customerList"
-            required
-            placeholder="ادخل أو اختر اسم العميل"
-          />
-          <datalist id="customerList"></datalist>
-        </div>
-        <div class="form-group">
-          <label for="customerCode">كود العميل</label>
-          <input
-            type="text"
-            id="customerCode"
-            name="Customer_Code"
-            class="mt-1"
-            readonly
-            required
-            placeholder="سيتم تعبئته تلقائياً"
-          />
-        </div>
+      <div class="form-group">
+        <label for="customerName">اسم العميل</label>
+        <input type="text" id="customerName" name="Customer_Name_AR" class="mt-1" list="customerList" placeholder="ابحث عن العميل..." required />
+        <datalist id="customerList">
+          </datalist>
       </div>
 
       <div class="form-group">
-        <label>نوع العميل</label>
-        <div class="radio-group">
-          <label>
-            <input type="radio" name="Customer_Type" value="عميل حالي" required />
-            عميل حالي
-          </label>
-          <label>
-            <input type="radio" name="Customer_Type" value="عميل محتمل" />
-            عميل محتمل
-          </label>
-        </div>
+        <label for="visitType">نوع الزيارة</label>
+        <select id="visitType" name="Visit_Type_Name_AR" class="mt-1" required>
+          <option value="">اختر نوع الزيارة</option>
+          </select>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div id="normalVisitRelatedFields">
         <div class="form-group">
-          <label for="visitDate">تاريخ الزيارة</label>
-          <input type="date" id="visitDate" name="Visit_Date" class="mt-1" required />
+          <label for="customerType">نوع العميل</label>
+          <select id="customerType" name="Customer_Type" class="mt-1" required>
+            <option value="">اختر نوع العميل</option>
+            <option value="حلويات">حلويات 🍬</option>
+            <option value="غذائية">غذائية 🍞</option>
+            <option value="عام">عام 🛒</option>
+          </select>
         </div>
-        <div class="form-group">
-          <label for="visitTime">وقت الزيارة</label>
-          <input type="time" id="visitTime" name="Visit_Time" class="mt-1" required />
-        </div>
-      </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="form-group">
-          <label for="visitType">نوع الزيارة</label>
-          <select id="visitType" name="Visit_Type_Name_AR" class="mt-1" required>
-            <option value="">اختر نوع الزيارة</option>
-            </select>
-        </div>
-        <div class="form-group">
-          <label for="visitPurpose">هدف الزيارة</label>
-          <select id="visitPurpose" name="Visit_Purpose" class="mt-1" required>
-            <option value="">اختر هدف الزيارة</option>
-            </select>
-        </div>
-        <div class="form-group">
-          <label for="visitOutcome">نتيجة الزيارة</label>
-          <select id="visitOutcome" name="Visit_Outcome" class="mt-1" required>
-            <option value="">اختر نتيجة الزيارة</option>
-            </select>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="form-group">
+            <label for="visitPurpose">غرض الزيارة</label>
+            <select id="visitPurpose" name="Visit_Purpose" class="mt-1" required>
+              <option value="">اختر غرض الزيارة</option>
+              </select>
+          </div>
+          <div class="form-group">
+            <label for="visitOutcome">نتيجة الزيارة</label>
+            <select id="visitOutcome" name="Visit_Outcome" class="mt-1" required>
+              <option value="">اختر نتيجة الزيارة</option>
+              </select>
+          </div>
         </div>
       </div>
 
@@ -109,7 +76,7 @@
         <textarea id="notes" name="Notes" rows="4" class="mt-1" placeholder="اكتب أي ملاحظات هنا..."></textarea>
       </div>
 
-      <div id="productSelectionSection" class="product-selection-section bg-gray-50 p-6 rounded-xl border border-gray-200">
+      <div id="normalProductSection" class="product-selection-section bg-gray-50 p-6 rounded-xl border border-gray-200">
         <h2 class="text-xl font-bold text-gray-700 mb-4">اختيار المنتجات حسب التصنيف</h2>
         <div id="productCategories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
           </div>
@@ -117,62 +84,50 @@
           </div>
       </div>
 
-      <div id="inventorySection" class="bg-gray-50 p-6 rounded-xl border border-gray-200" style="display: none;">
-        <h2 class="text-xl font-bold text-gray-700 mb-4">بيانات الجرد الاستثنائي</h2>
-        <div class="form-group">
-            <label for="inventoryProductName">اسم المنتج (الجرد)</label>
-            <input
-                type="text"
-                id="inventoryProductName"
-                name="Inventory_Product_Name_AR"
-                class="mt-1"
-                list="inventoryProductList"
-                placeholder="ابحث أو اختر منتج الجرد"
-            />
-            <datalist id="inventoryProductList"></datalist>
+      <div id="inventorySection" class="bg-yellow-50 p-6 rounded-xl border border-yellow-300 hidden">
+        <h2 class="text-xl font-bold text-yellow-800 mb-4">قسم الجرد الاستثنائي</h2>
+        
+        <datalist id="inventoryList">
+            </datalist>
+
+        <div id="inventoryItemsContainer" class="space-y-4">
+          <div class="inventory-item border border-yellow-200 p-4 rounded-lg bg-white relative">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label>البحث عن المنتج</label>
+                <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." required />
+              </div>
+              <div class="form-group">
+                <label>الكمية</label>
+                <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required />
+              </div>
+              <div class="form-group">
+                <label>تاريخ الانتهاء</label>
+                <input type="date" name="Expiration_Date" />
+              </div>
+              <div class="form-group">
+                <label>الوحدة</label>
+                <select name="Unit_Label" required>
+                  <option value="">اختر الوحدة</option>
+                  <option value="علبة">علبة</option>
+                  <option value="شد">شد</option>
+                  <option value="باكت">باكت</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="removeInventoryItem absolute top-2 left-2 text-red-600 text-sm">❌ حذف</button>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="form-group">
-                <label for="inventoryProductCode">كود المنتج</label>
-                <input type="text" id="inventoryProductCode" name="Inventory_Product_Code" class="mt-1" readonly placeholder="يُملأ تلقائياً" />
-            </div>
-            <div class="form-group">
-                <label for="inventoryCategory">الفئة</label>
-                <input type="text" id="inventoryCategory" name="Inventory_Category" class="mt-1" readonly placeholder="يُملأ تلقائياً" />
-            </div>
-            <div class="form-group">
-                <label for="inventoryPackageType">نوع العبوة</label>
-                <input type="text" id="inventoryPackageType" name="Inventory_Package_Type" class="mt-1" readonly placeholder="يُملأ تلقائياً" />
-            </div>
-            <div class="form-group">
-                <label for="inventoryUnitSize">حجم الوحدة</label>
-                <input type="text" id="inventoryUnitSize" name="Inventory_Unit_Size" class="mt-1" readonly placeholder="يُملأ تلقائياً" />
-            </div>
-            <div class="form-group">
-                <label for="inventoryUnitLabel">وحدة القياس</label>
-                <input type="text" id="inventoryUnitLabel" name="Inventory_Unit_Label" class="mt-1" readonly placeholder="يُملأ تلقائياً" />
-            </div>
-            <div class="form-group">
-                <label for="inventoryQuantity">الكمية</label>
-                <input type="number" id="inventoryQuantity" name="Inventory_Quantity" class="mt-1" placeholder="أدخل الكمية" />
-            </div>
-        </div>
-        <div class="form-group mt-6">
-            <label for="inventoryExpirationDate">تاريخ الانتهاء</label>
-            <input type="date" id="inventoryExpirationDate" name="Inventory_Expiration_Date" class="mt-1" />
+        <div class="text-center mt-4">
+          <button type="button" id="addInventoryItem" class="btn-secondary">➕ إضافة منتج آخر</button>
         </div>
       </div>
-      
+
       <div class="text-center mt-8">
-        <button
-          type="submit"
-          id="submitBtn"
-          class="btn-primary"
-          aria-label="إرسال النموذج"
-        >
-          <span id="buttonText">إرسال النموذج</span>
-          <span id="loadingSpinner" class="loading-spinner" style="display: none;"></span>
+        <button type="submit" id="submitBtn" class="btn-primary">
+          إرسال البيانات
+          <span id="loadingSpinner" class="loading-spinner hidden"></span>
         </button>
       </div>
     </form>
