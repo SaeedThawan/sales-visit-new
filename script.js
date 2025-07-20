@@ -283,7 +283,37 @@ function validateProductStatuses() {
   return allValid;
 }
 
-// **تم إزالة دالة validateInventoryItems() لأنها لم تعد مطلوبة**
+// التحقق من صحة حقول منتجات الجرد
+function validateInventoryItems() {
+  // إذا كان قسم الجرد مخفيًا، فلا داعي للتحقق
+  if (inventorySectionDiv.classList.contains('hidden')) {
+    return true;
+  }
+
+  const items = inventoryItemsContainer.querySelectorAll('.inventory-item');
+  if (items.length === 0) {
+    showWarningMessage('يرجى إضافة منتجات الجرد وتعبئة جميع الحقول المطلوبة.');
+    return false;
+  }
+
+  let allValid = true;
+  items.forEach(itemDiv => {
+    const inputs = itemDiv.querySelectorAll('input[required], select[required]');
+    inputs.forEach(input => {
+      if (!input.value) {
+        allValid = false;
+        input.classList.add('border-red-500'); // تمييز الحقل غير الصالح
+        setTimeout(() => input.classList.remove('border-red-500'), 3000);
+      }
+    });
+  });
+
+  if (!allValid) {
+    showWarningMessage('يرجى تعبئة جميع الحقول المطلوبة في قسم الجرد.');
+  }
+
+  return allValid;
+}
 
 // ---------------------------------------------------
 // وظيفة معالجة إرسال النموذج (handleSubmit)
@@ -299,44 +329,17 @@ async function handleSubmit(event) {
   const selectedVisitType = visitTypeSelect.value;
   let payload = {}; // المتغير الذي سيحمل البيانات النهائية للإرسال
 
-  // التحقق من الحقول الإجبارية العامة للنموذج
-  // هذه التحققات تنطبق على الجميع قبل الدخول في منطق نوع الزيارة
-  if (!salesRepNameSelect.value || !customerNameInput.value || !visitTypeSelect.value) {
-      showWarningMessage('الرجاء تعبئة حقول "مندوب المبيعات", "اسم العميل", و "نوع الزيارة".');
+  if (selectedVisitType === 'جرد استثنائي') {
+    // التحقق من صحة حقول الجرد قبل الإرسال
+    if (!validateInventoryItems()) {
       submitBtn.disabled = false;
       loadingSpinner.classList.add('hidden');
       return;
-  }
-  if (selectedVisitType !== 'جرد استثنائي' && (!visitPurposeSelect.value || !visitOutcomeSelect.value || !customerTypeSelect.value)) {
-       showWarningMessage('الرجاء تعبئة حقول "الغرض من الزيارة", "نتيجة الزيارة", و "نوع العميل" للزيارات العادية.');
-       submitBtn.disabled = false;
-       loadingSpinner.classList.add('hidden');
-       return;
-  }
-
-
-  if (selectedVisitType === 'جرد استثنائي') {
-    // **لم نعد نتحقق من حقول الجرد هنا، لأنها ليست إلزامية**
+    }
 
     const collectedInventoryData = [];
     inventoryItemsContainer.querySelectorAll('.inventory-item').forEach(itemDiv => {
-      const productNameInput = itemDiv.querySelector('[name="Inventory_Product_Name_AR"]');
-      const quantityInput = itemDiv.querySelector('[name="Inventory_Quantity"]');
-      const unitLabelSelect = itemDiv.querySelector('[name="Unit_Label"]');
-      const expirationDateInput = itemDiv.querySelector('[name="Expiration_Date"]');
-
-      // **نجمع البيانات حتى لو كانت فارغة، ولن نجعلها إلزامية**
-      const productName = productNameInput ? productNameInput.value : '';
-      const quantity = quantityInput ? quantityInput.value : '';
-      const unitLabel = unitLabelSelect ? unitLabelSelect.value : '';
-      const expirationDate = expirationDateInput ? expirationDateInput.value : '';
-
-      // إذا كانت جميع الحقول الأساسية لمنتج الجرد فارغة، نتجاهل هذا العنصر (اختياري)
-      // يمكنك تعديل هذا الشرط إذا كنت تريد إرسال صفوف فارغة تمامًا
-      if (!productName && !quantity && !unitLabel && !expirationDate) {
-          return; // تخطي هذا العنصر لأنه فارغ تمامًا
-      }
-
+      const productName = itemDiv.querySelector('[name="Inventory_Product_Name_AR"]').value;
       const selectedOption = inventoryListDatalist.querySelector(`option[value="${productName}"]`);
       
       let productDetails = {};
@@ -360,20 +363,12 @@ async function handleSubmit(event) {
         Category: productDetails.category || '',
         Package_Type: productDetails.packageType || '',
         Unit_Size: productDetails.unitSize || '',
-        Quantity: quantity, // الكمية قد تكون فارغة الآن
-        Expiration_Date: expirationDate, // تاريخ الانتهاء قد يكون فارغا الآن
-        Unit_Label: unitLabel, // الوحدة قد تكون فارغة الآن
+        Quantity: itemDiv.querySelector('[name="Inventory_Quantity"]').value,
+        Expiration_Date: itemDiv.querySelector('[name="Expiration_Date"]').value || '',
+        Unit_Label: itemDiv.querySelector('[name="Unit_Label"]').value,
         Notes: formData.get('Notes') || ''
       });
     });
-
-    // إذا لم يتم جمع أي بيانات جرد بعد الفلترة (أي كل العناصر فارغة)، يمكن إيقاف الإرسال أو السماح به
-    if (collectedInventoryData.length === 0) {
-        showWarningMessage('لم يتم إدخال أي منتجات جرد صالحة للإرسال. يرجى ملء حقل واحد على الأقل في كل صف جرد أو إضافة صفوف جديدة.');
-        submitBtn.disabled = false;
-        loadingSpinner.classList.add('hidden');
-        return;
-    }
 
     // بناء الـ payload لبيانات الجرد
     payload = {
@@ -383,10 +378,8 @@ async function handleSubmit(event) {
 
   } else { // زيارة عادية (غير جرد استثنائي)
     // التحقق من صحة حقول النموذج الرئيسية
-    // تم نقل التحقق من الحقول الرئيسية العامة إلى أعلى الدالة
-    // إذا كان نوع الزيارة عادية، فهذه الحقول (Purpose, Outcome, CustomerType) مطلوبة
-    if (!visitForm.checkValidity()) { // هذا التحقق سيشمل الحقول المطلوبة التي بقيت
-        showWarningMessage('يرجى تعبئة جميع الحقول المطلوبة للزيارة العادية.');
+    if (!visitForm.checkValidity()) {
+        showWarningMessage('يرجى تعبئة جميع الحقول المطلوبة.');
         submitBtn.disabled = false;
         loadingSpinner.classList.add('hidden');
         return;
@@ -488,6 +481,10 @@ function toggleVisitSections(selectedType) {
     visitPurposeSelect.removeAttribute('required');
     visitOutcomeSelect.removeAttribute('required');
 
+    // مسح أي منتجات مختارة في قسم الزيارات العادية
+    productsDisplayDiv.innerHTML = '';
+    document.querySelectorAll('#productCategories input[type="checkbox"]').forEach(c => c.checked = false);
+
 
   } else {
     normalVisitRelatedFieldsDiv.classList.remove('hidden');
@@ -516,11 +513,11 @@ function addInventoryItem() {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="form-group">
           <label>البحث عن المنتج</label>
-          <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." />
+          <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." required />
         </div>
         <div class="form-group">
           <label>الكمية</label>
-          <input type="number" name="Inventory_Quantity" min="0" placeholder="أدخل الكمية" />
+          <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required />
         </div>
         <div class="form-group">
           <label>تاريخ الانتهاء</label>
@@ -528,7 +525,7 @@ function addInventoryItem() {
         </div>
         <div class="form-group">
           <label>الوحدة</label>
-          <select name="Unit_Label">
+          <select name="Unit_Label" required>
             <option value="">اختر الوحدة</option>
             <option value="علبة">علبة</option>
             <option value="شد">شد</option>
@@ -545,42 +542,39 @@ function addInventoryItem() {
 
 // إضافة عنصر الجرد الأولي عند تحميل الصفحة أو إعادة التعيين
 function addInitialInventoryItem() {
-  // Always ensure at least one inventory item is present when this function is called
-  // First, clear existing items to ensure proper state after reset
-  inventoryItemsContainer.innerHTML = ''; 
-
-  const template = `
-    <div class="inventory-item border border-yellow-200 p-4 rounded-lg bg-white relative">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="form-group">
-          <label>البحث عن المنتج</label>
-          <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." />
+  if (inventoryItemsContainer.children.length === 0) { 
+    const template = `
+      <div class="inventory-item border border-yellow-200 p-4 rounded-lg bg-white relative">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-group">
+            <label>البحث عن المنتج</label>
+            <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." required />
+          </div>
+          <div class="form-group">
+            <label>الكمية</label>
+            <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required />
+          </div>
+          <div class="form-group">
+            <label>تاريخ الانتهاء</label>
+            <input type="date" name="Expiration_Date" />
+          </div>
+          <div class="form-group">
+            <label>الوحدة</label>
+            <select name="Unit_Label" required>
+              <option value="">اختر الوحدة</option>
+              <option value="علبة">علبة</option>
+              <option value="شد">شد</option>
+              <option value="باكت">باكت</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label>الكمية</label>
-          <input type="number" name="Inventory_Quantity" min="0" placeholder="أدخل الكمية" />
-        </div>
-        <div class="form-group">
-          <label>تاريخ الانتهاء</label>
-          <input type="date" name="Expiration_Date" />
-        </div>
-        <div class="form-group">
-          <label>الوحدة</label>
-          <select name="Unit_Label">
-            <option value="">اختر الوحدة</option>
-            <option value="علبة">علبة</option>
-            <option value="شد">شد</option>
-            <option value="باكت">باكت</option>
-          </select>
-        </div>
+        <button type="button" class="removeInventoryItem absolute top-2 left-2 text-red-600 text-sm">❌ حذف</button>
       </div>
-      <button type="button" class="removeInventoryItem absolute top-2 left-2 text-red-600 text-sm">❌ حذف</button>
-    </div>
-  `;
-  const initialItem = document.createRange().createContextualFragment(template);
-  inventoryItemsContainer.appendChild(initialItem);
+    `;
+    const initialItem = document.createRange().createContextualFragment(template);
+    inventoryItemsContainer.appendChild(initialItem);
+  }
 }
-
 
 // ---------------------------------------------------
 // الأحداث عند تحميل الصفحة
