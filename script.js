@@ -1,13 +1,8 @@
-const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+const GOOGLE_SHEETS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbym4rVEUWd0xkp9JglZNkZp6Hse6IxGSkHgqqKsi05GJhwe2AD95Z1-bGCv7dhWMLBqXQ/exec';
 
-// ✅ المتغيرات العامة
-let productsData = [];
-let salesRepresentatives = [];
-let customersMain = [];
-let visitOutcomes = [];
-let visitPurposes = [];
-let visitTypes = [];
-let inventoryProducts = [];
+// المتغيرات العامة
+let productsData = [], salesRepresentatives = [], customersMain = [], visitOutcomes = [],
+    visitPurposes = [], visitTypes = [], inventoryProducts = [];
 
 const visitForm = document.getElementById('visitForm');
 const visitTypeSelect = document.getElementById('visitType');
@@ -20,12 +15,11 @@ const productCategoriesDiv = document.getElementById('productCategories');
 const productsDisplayDiv = document.getElementById('productsDisplay');
 const submitBtn = document.getElementById('submitBtn');
 const loadingSpinner = document.getElementById('loadingSpinner');
-
 const inventorySection = document.getElementById('inventorySection');
 const inventoryItemsContainer = document.getElementById('inventoryItemsContainer');
 const addInventoryItemBtn = document.getElementById('addInventoryItem');
 
-// ✅ رسائل SweetAlert
+// SweetAlert
 function showSuccessMessage() {
   Swal.fire({ title: '✅ تم الإرسال!', text: 'تم إرسال النموذج بنجاح.', icon: 'success', confirmButtonText: 'ممتاز' });
 }
@@ -36,21 +30,15 @@ function showWarningMessage(msg) {
   Swal.fire({ title: '⚠️ تنبيه', text: msg, icon: 'warning', confirmButtonText: 'موافق' });
 }
 
-// ✅ أدوات مساعدة
+// أدوات مساعدة
 function generateVisitID() {
   return `VISIT-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
 }
-function formatDate(d) {
-  return d.toLocaleDateString('ar-SA');
-}
-function formatTime(d) {
-  return d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-}
-function formatTimestamp(d) {
-  return d.toLocaleString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-}
+function formatDate(d) { return d.toLocaleDateString('ar-SA'); }
+function formatTime(d) { return d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); }
+function formatTimestamp(d) { return d.toLocaleString('ar-SA', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }); }
 
-// ✅ تحميل ملفات JSON
+// تحميل ملفات JSON
 async function fetchJsonData(url) {
   try {
     const res = await fetch(url);
@@ -62,7 +50,7 @@ async function fetchJsonData(url) {
   }
 }
 
-// ✅ تعبئة القوائم
+// تعبئة القوائم
 async function loadAllData() {
   [
     productsData,
@@ -110,7 +98,7 @@ function populateCustomerDatalist() {
   });
 }
 
-// ✅ المنتجات حسب التصنيف
+// المنتجات حسب التصنيف
 let productCategories = {};
 function setupProductCategories() {
   productCategoriesDiv.innerHTML = '';
@@ -172,38 +160,38 @@ function validateProductStatuses() {
   if (!valid) showWarningMessage('يرجى تحديد حالة كل منتج.');
   return valid;
 }
-// ✅ إظهار قسم الجرد عند اختيار "جرد استثنائي"
+// ✅ التفاعل عند تغيير نوع الزيارة
 visitTypeSelect.addEventListener('change', () => {
   const selectedType = visitTypeSelect.value;
   const isInventory = selectedType === 'جرد استثنائي';
 
-  const customerTypeDiv = document.getElementById('customerType').parentElement;
-  const visitPurposeDiv = visitPurposeSelect.parentElement;
-  const visitOutcomeDiv = visitOutcomeSelect.parentElement;
-  const notesDiv = document.getElementById('notes').parentElement;
+  const customerTypeDiv = document.getElementById('customerType')?.parentElement;
+  const visitPurposeDiv = visitPurposeSelect?.parentElement;
+  const visitOutcomeDiv = visitOutcomeSelect?.parentElement;
+  const notesDiv = document.getElementById('notes')?.parentElement;
   const productSelectionDiv = document.querySelector('.product-selection-section');
 
   if (isInventory) {
-    inventorySection.classList.remove('hidden');
-    customerTypeDiv.classList.add('hidden');
-    visitPurposeDiv.classList.add('hidden');
-    visitOutcomeDiv.classList.add('hidden');
-    notesDiv.classList.add('hidden');
-    productSelectionDiv.classList.add('hidden');
+    inventorySection?.classList.remove('hidden');
+    customerTypeDiv?.classList.add('hidden');
+    visitPurposeDiv?.classList.add('hidden');
+    visitOutcomeDiv?.classList.add('hidden');
+    notesDiv?.classList.add('hidden');
+    productSelectionDiv?.classList.add('hidden');
     inventoryItemsContainer.innerHTML = '';
     loadInventoryProducts();
   } else {
-    inventorySection.classList.add('hidden');
-    customerTypeDiv.classList.remove('hidden');
-    visitPurposeDiv.classList.remove('hidden');
-    visitOutcomeDiv.classList.remove('hidden');
-    notesDiv.classList.remove('hidden');
-    productSelectionDiv.classList.remove('hidden');
+    inventorySection?.classList.add('hidden');
+    customerTypeDiv?.classList.remove('hidden');
+    visitPurposeDiv?.classList.remove('hidden');
+    visitOutcomeDiv?.classList.remove('hidden');
+    notesDiv?.classList.remove('hidden');
+    productSelectionDiv?.classList.remove('hidden');
     inventoryItemsContainer.innerHTML = '';
   }
 });
 
-// ✅ تحميل المنتجات من ملف inventory_products.json
+// ✅ تحميل منتجات الجرد في قائمة البحث
 function loadInventoryProducts() {
   const datalist = document.getElementById('inventoryList');
   datalist.innerHTML = '';
@@ -214,7 +202,7 @@ function loadInventoryProducts() {
   });
 }
 
-// ✅ إضافة منتج جرد جديد
+// ✅ إضافة عنصر جرد جديد
 addInventoryItemBtn.addEventListener('click', () => {
   const item = document.createElement('div');
   item.className = 'inventory-item border border-yellow-200 p-4 rounded-lg bg-white relative';
@@ -247,7 +235,7 @@ addInventoryItemBtn.addEventListener('click', () => {
   inventoryItemsContainer.appendChild(item);
 });
 
-// ✅ حذف منتج جرد
+// ✅ حذف عنصر جرد
 inventoryItemsContainer.addEventListener('click', e => {
   if (e.target.classList.contains('removeInventoryItem')) {
     e.target.parentElement.remove();
@@ -267,11 +255,9 @@ async function handleSubmit(event) {
   const formData = new FormData(visitForm);
   const visitType = formData.get('Visit_Type_Name_AR');
   const now = new Date();
-
   let payload = {};
 
   if (visitType === 'جرد استثنائي') {
-    // ✅ إعداد بيانات الجرد Inventory_Logs
     const inventoryItems = inventoryItemsContainer.querySelectorAll('.inventory-item');
     if (inventoryItems.length === 0) {
       showWarningMessage('يرجى إضافة منتج واحد على الأقل في الجرد.');
@@ -331,7 +317,6 @@ async function handleSubmit(event) {
     payload = { sheetName: 'Inventory_Logs', data: allInventoryData };
 
   } else {
-    // ✅ إعداد بيانات الزيارة Visit_Logs
     if (!validateProductStatuses()) {
       submitBtn.disabled = false;
       loadingSpinner.classList.add('hidden');
@@ -371,7 +356,7 @@ async function handleSubmit(event) {
   }
 
   try {
-    const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+    await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
@@ -393,7 +378,7 @@ async function handleSubmit(event) {
   }
 }
 
-// ✅ تحميل البيانات وتوصيل الأحداث
+// ✅ تحميل البيانات وتوصيل الأحداث عند فتح الصفحة
 document.addEventListener('DOMContentLoaded', () => {
   loadAllData();
   visitForm.addEventListener('submit', handleSubmit);
