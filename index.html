@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>نموذج تسجيل زيارات المبيعات</title>
 
-  <!-- ✅ Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- ✅ SweetAlert2 -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- ✅ ملف التنسيق -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,84 +18,111 @@
     </h1>
 
     <form id="visitForm" class="space-y-6">
-      <!-- اسم الموظف -->
       <div class="form-group">
         <label for="entryUserName">اسم الموظف (المدخل)</label>
         <input type="text" id="entryUserName" name="Entry_User_Name" class="mt-1" required />
       </div>
 
-      <!-- اسم المندوب -->
       <div class="form-group">
         <label for="salesRepName">اسم المندوب</label>
         <select id="salesRepName" name="Sales_Rep_Name_AR" class="mt-1" required>
           <option value="">اختر المندوب</option>
-          <!-- سيتم تعبئته عبر JS -->
-        </select>
+          </select>
       </div>
 
-      <!-- اسم العميل -->
       <div class="form-group">
         <label for="customerName">اسم العميل</label>
         <input type="text" id="customerName" name="Customer_Name_AR" class="mt-1" list="customerList" placeholder="ابحث عن العميل..." required />
         <datalist id="customerList">
-          <!-- سيتم تعبئته عبر JS -->
-        </datalist>
+          </datalist>
       </div>
 
-      <!-- نوع العميل -->
       <div class="form-group">
-        <label for="customerType">نوع العميل</label>
-        <select id="customerType" name="Customer_Type" class="mt-1" required>
-          <option value="">اختر نوع العميل</option>
-          <option value="حلويات">حلويات 🍬</option>
-          <option value="غذائية">غذائية 🍞</option>
-          <option value="عام">عام 🛒</option>
-        </select>
+        <label for="visitType">نوع الزيارة</label>
+        <select id="visitType" name="Visit_Type_Name_AR" class="mt-1" required>
+          <option value="">اختر نوع الزيارة</option>
+          </select>
       </div>
 
-      <!-- تفاصيل الزيارة -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div id="normalVisitRelatedFields">
         <div class="form-group">
-          <label for="visitType">نوع الزيارة</label>
-          <select id="visitType" name="Visit_Type_Name_AR" class="mt-1" required>
-            <option value="">اختر نوع الزيارة</option>
-            <!-- سيتم تعبئته عبر JS -->
+          <label for="customerType">نوع العميل</label>
+          <select id="customerType" name="Customer_Type" class="mt-1" required>
+            <option value="">اختر نوع العميل</option>
+            <option value="حلويات">حلويات 🍬</option>
+            <option value="غذائية">غذائية 🍞</option>
+            <option value="عام">عام 🛒</option>
           </select>
         </div>
-        <div class="form-group">
-          <label for="visitPurpose">غرض الزيارة</label>
-          <select id="visitPurpose" name="Visit_Purpose" class="mt-1" required>
-            <option value="">اختر غرض الزيارة</option>
-            <!-- سيتم تعبئته عبر JS -->
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="visitOutcome">نتيجة الزيارة</label>
-          <select id="visitOutcome" name="Visit_Outcome" class="mt-1" required>
-            <option value="">اختر نتيجة الزيارة</option>
-            <!-- سيتم تعبئته عبر JS -->
-          </select>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="form-group">
+            <label for="visitPurpose">غرض الزيارة</label>
+            <select id="visitPurpose" name="Visit_Purpose" class="mt-1" required>
+              <option value="">اختر غرض الزيارة</option>
+              </select>
+          </div>
+          <div class="form-group">
+            <label for="visitOutcome">نتيجة الزيارة</label>
+            <select id="visitOutcome" name="Visit_Outcome" class="mt-1" required>
+              <option value="">اختر نتيجة الزيارة</option>
+              </select>
+          </div>
         </div>
       </div>
 
-      <!-- ملاحظات -->
       <div class="form-group">
         <label for="notes">ملاحظات</label>
         <textarea id="notes" name="Notes" rows="4" class="mt-1" placeholder="اكتب أي ملاحظات هنا..."></textarea>
       </div>
 
-      <!-- المنتجات حسب التصنيفات -->
-      <div class="product-selection-section bg-gray-50 p-6 rounded-xl border border-gray-200">
+      <div id="normalProductSection" class="product-selection-section bg-gray-50 p-6 rounded-xl border border-gray-200">
         <h2 class="text-xl font-bold text-gray-700 mb-4">اختيار المنتجات حسب التصنيف</h2>
         <div id="productCategories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-          <!-- سيتم تعبئته عبر JS -->
-        </div>
+          </div>
         <div id="productsDisplay" class="space-y-4">
-          <!-- سيتم عرض المنتجات الديناميكية هنا -->
+          </div>
+      </div>
+
+      <div id="inventorySection" class="bg-yellow-50 p-6 rounded-xl border border-yellow-300 hidden">
+        <h2 class="text-xl font-bold text-yellow-800 mb-4">قسم الجرد الاستثنائي</h2>
+        
+        <div id="inventoryItemsContainer" class="space-y-4">
+          <div class="inventory-item border border-yellow-200 p-4 rounded-lg bg-white relative">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="form-group">
+                <label>البحث عن المنتج</label>
+                <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." required />
+                <datalist id="inventoryList">
+                  </datalist>
+              </div>
+              <div class="form-group">
+                <label>الكمية</label>
+                <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required />
+              </div>
+              <div class="form-group">
+                <label>تاريخ الانتهاء</label>
+                <input type="date" name="Expiration_Date" />
+              </div>
+              <div class="form-group">
+                <label>الوحدة</label>
+                <select name="Unit_Label" required>
+                  <option value="">اختر الوحدة</option>
+                  <option value="علبة">علبة</option>
+                  <option value="شد">شد</option>
+                  <option value="باكت">باكت</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="removeInventoryItem absolute top-2 left-2 text-red-600 text-sm">❌ حذف</button>
+          </div>
+        </div>
+
+        <div class="text-center mt-4">
+          <button type="button" id="addInventoryItem" class="btn-secondary">➕ إضافة منتج آخر</button>
         </div>
       </div>
 
-      <!-- زر الإرسال -->
       <div class="text-center mt-8">
         <button type="submit" id="submitBtn" class="btn-primary">
           إرسال البيانات
@@ -108,48 +132,6 @@
     </form>
   </div>
 
-  <!-- ✅ سكربت التشغيل -->
   <script src="script.js"></script>
 </body>
-</html><!-- ✅ أضفت قسم الجرد مباشرة بعد قسم ملاحظات -->
-<div id="inventorySection" class="bg-yellow-50 p-6 rounded-xl border border-yellow-300 hidden">
-  <h2 class="text-xl font-bold text-yellow-800 mb-4">قسم الجرد الاستثنائي</h2>
-  
-  <div id="inventoryItemsContainer" class="space-y-4">
-    <!-- حقل منتج واحد كبداية -->
-    <div class="inventory-item border border-yellow-200 p-4 rounded-lg bg-white relative">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="form-group">
-          <label>البحث عن المنتج</label>
-          <input type="text" name="Inventory_Product_Name_AR" list="inventoryList" placeholder="ابحث..." required />
-          <datalist id="inventoryList">
-            <!-- سيتم تعبئته عبر JS -->
-          </datalist>
-        </div>
-        <div class="form-group">
-          <label>الكمية</label>
-          <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required />
-        </div>
-        <div class="form-group">
-          <label>تاريخ الانتهاء</label>
-          <input type="date" name="Expiration_Date" />
-        </div>
-        <div class="form-group">
-          <label>الوحدة</label>
-          <select name="Unit_Label" required>
-            <option value="">اختر الوحدة</option>
-            <option value="علبة">علبة</option>
-            <option value="شد">شد</option>
-            <option value="باكت">باكت</option>
-          </select>
-        </div>
-      </div>
-      <button type="button" class="removeInventoryItem absolute top-2 left-2 text-red-600 text-sm">❌ حذف</button>
-    </div>
-  </div>
-
-  <!-- زر إضافة منتج آخر -->
-  <div class="text-center mt-4">
-    <button type="button" id="addInventoryItem" class="btn-secondary">➕ إضافة منتج آخر</button>
-  </div>
-</div>
+</html>
