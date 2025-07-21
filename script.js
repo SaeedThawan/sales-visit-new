@@ -316,81 +316,55 @@ async function handleSubmit(event) {
 
 
   if (selectedVisitType === 'جرد استثنائي') {
-    // **لم نعد نتحقق من حقول الجرد هنا، لأنها ليست إلزامية**
+  // ✅ إرسال بيانات تجريبية ثابتة لاختبار التواصل مع Google Sheets
+  const payload = {
+    sheetName: 'Inventory_Logs',
+    data: [{
+      Inventory_ID: "TEST-123456",
+      Timestamp: formatTimestamp(new Date()),
+      Entry_User_Name: "سعيد",
+      Sales_Rep_Name_AR: "مندوب اختبار",
+      Customer_Name_AR: "عميل تجريبي",
+      Customer_Code: "C000",
+      Product_Name_AR: "منتج تجريبي",
+      Product_Code: "P000",
+      Quantity: 10,
+      Expiration_Date: "2025-12-31",
+      Category: "تجريبي",
+      Package_Type: "علبة",
+      Unit_Size: "100جم",
+      Unit_Label: "علبة",
+      Notes: "اختبار تجريبي"
+    }]
+  };
 
-    const collectedInventoryData = [];
-    inventoryItemsContainer.querySelectorAll('.inventory-item').forEach(itemDiv => {
-      const productNameInput = itemDiv.querySelector('[name="Inventory_Product_Name_AR"]');
-      const quantityInput = itemDiv.querySelector('[name="Inventory_Quantity"]');
-      const unitLabelSelect = itemDiv.querySelector('[name="Unit_Label"]');
-      const expirationDateInput = itemDiv.querySelector('[name="Expiration_Date"]');
-
-      // **نجمع البيانات حتى لو كانت فارغة، ولن نجعلها إلزامية**
-      const productName = productNameInput ? productNameInput.value : '';
-      const quantity = quantityInput ? quantityInput.value : '';
-      const unitLabel = unitLabelSelect ? unitLabelSelect.value : '';
-      const expirationDate = expirationDateInput ? expirationDateInput.value : '';
-
-      // إذا كانت جميع الحقول الأساسية لمنتج الجرد فارغة، نتجاهل هذا العنصر (اختياري)
-      // يمكنك تعديل هذا الشرط إذا كنت تريد إرسال صفوف فارغة تمامًا
-      if (!productName && !quantity && !unitLabel && !expirationDate) {
-          return; // تخطي هذا العنصر لأنه فارغ تمامًا
-      }
-
-      const selectedOption = inventoryListDatalist.querySelector(`option[value="${productName}"]`);
-      
-      let productDetails = {};
-      if (selectedOption) {
-          // استعادة جميع تفاصيل المنتج من dataset الخاص بـ option
-          for (const key in selectedOption.dataset) {
-              productDetails[key] = selectedOption.dataset[key];
-          }
-      }
-
-      collectedInventoryData.push({
-        Inventory_ID: generateInventoryID(),
-        Timestamp: formatTimestamp(now),
-        Entry_User_Name: formData.get('Entry_User_Name'),
-        Sales_Rep_Name_AR: formData.get('Sales_Rep_Name_AR'),
-        Customer_Name_AR: formData.get('Customer_Name_AR'),
-        // البحث عن Customer_Code من بيانات العملاء الرئيسية
-        Customer_Code: customersMain.find(c => c.Customer_Name_AR === formData.get('Customer_Name_AR'))?.Customer_Code || '',
-        Product_Name_AR: productName,
-        Product_Code: productDetails.productCode || '',
-        Category: productDetails.category || '',
-        Package_Type: productDetails.packageType || '',
-        Unit_Size: productDetails.unitSize || '',
-        Quantity: quantity, // الكمية قد تكون فارغة الآن
-        Expiration_Date: expirationDate, // تاريخ الانتهاء قد يكون فارغا الآن
-        Unit_Label: unitLabel, // الوحدة قد تكون فارغة الآن
-        Notes: formData.get('Notes') || ''
-      });
+  // إرسال البيانات باستخدام fetch
+  try {
+    const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
     });
 
-    // إذا لم يتم جمع أي بيانات جرد بعد الفلترة (أي كل العناصر فارغة)، يمكن إيقاف الإرسال أو السماح به
-    if (collectedInventoryData.length === 0) {
-        showWarningMessage('لم يتم إدخال أي منتجات جرد صالحة للإرسال. يرجى ملء حقل واحد على الأقل في كل صف جرد أو إضافة صفوف جديدة.');
-        submitBtn.disabled = false;
-        loadingSpinner.classList.add('hidden');
-        return;
-    }
+    // ✅ إذا لم يحدث خطأ في الشبكة، نعتبر الإرسال ناجحًا
+    showSuccessMessage();
+    visitForm.reset(); // إعادة تعيين النموذج
+    loadingSpinner.classList.add('hidden');
+    submitBtn.disabled = false;
 
-    // بناء الـ payload لبيانات الجرد
-    payload = {
-      sheetName: 'Inventory_Logs',
-      data: collectedInventoryData
-    };
+  } catch (error) {
+    console.error('فشل الإرسال:', error);
+    showErrorMessage('حدث خطأ أثناء إرسال البيانات.');
+    loadingSpinner.classList.add('hidden');
+    submitBtn.disabled = false;
+  }
 
-  } else { // زيارة عادية (غير جرد استثنائي)
-    // التحقق من صحة حقول النموذج الرئيسية
-    // تم نقل التحقق من الحقول الرئيسية العامة إلى أعلى الدالة
-    // إذا كان نوع الزيارة عادية، فهذه الحقول (Purpose, Outcome, CustomerType) مطلوبة
-    if (!visitForm.checkValidity()) { // هذا التحقق سيشمل الحقول المطلوبة التي بقيت
-        showWarningMessage('يرجى تعبئة جميع الحقول المطلوبة للزيارة العادية.');
-        submitBtn.disabled = false;
-        loadingSpinner.classList.add('hidden');
-        return;
-    }
+  // إيقاف بقية المعالجة بعد الإرسال التجريبي
+  return;
+}
 
     // التحقق من حالة توفر المنتجات
     if (!validateProductStatuses()) {
@@ -470,7 +444,6 @@ async function handleSubmit(event) {
     submitBtn.disabled = false; // تفعيل زر الإرسال
     loadingSpinner.classList.add('hidden'); // إخفاء مؤشر التحميل
   }
-}
 
 // ---------------------------------------------------
 // وظائف إدارة الأقسام المرئية (Dynamic Sections)
