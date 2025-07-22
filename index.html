@@ -1,116 +1,111 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>نموذج تسجيل زيارات المبيعات</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نموذج تسجيل زيارات المبيعات</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-3xl font-extrabold text-center text-gray-800 mb-8">
-            نموذج تسجيل زيارات المبيعات
-        </h1>
+  <div class="container">
+    <h1 class="text-3xl font-extrabold text-center text-gray-800 mb-8">
+      نموذج تسجيل زيارات المبيعات
+    </h1>
 
-        <form id="visitForm" class="space-y-6">
+    <form id="visitForm" class="space-y-6">
+      <div class="form-group">
+        <label for="entryUserName">اسم الموظف (المدخل)</label>
+        <input type="text" id="entryUserName" name="Entry_User_Name" class="mt-1" required placeholder="أدخل اسم الموظف" />
+      </div>
 
-            <div class="form-group">
-                <label for="entryUserName">اسم الموظف (المدخل)</label>
-                <input type="text" id="entryUserName" name="Entry_User_Name" class="mt-1" required placeholder="أدخل اسم الموظف" />
-            </div>
+      <div class="form-group">
+        <label for="salesRepName">اسم المندوب</label>
+        <select id="salesRepName" name="Sales_Rep_Name_AR" class="mt-1" required>
+          <option value="">اختر المندوب</option>
+        </select>
+      </div>
 
-            <div class="form-group">
-                <label for="salesRepName">اسم المندوب</label>
-                <select id="salesRepName" name="Sales_Rep_Name_AR" class="mt-1" required>
-                    <option value="">اختر المندوب</option>
-                </select>
-            </div>
+      <div class="form-group">
+        <label for="customerName">اسم العميل</label>
+        <input type="text" id="customerName" name="Customer_Name_AR" class="mt-1" list="customerList" placeholder="ابحث عن العميل..." required />
+        <datalist id="customerList"></datalist>
+      </div>
 
-            <div class="form-group">
-                <label for="customerName">اسم العميل</label>
-                <input type="text" id="customerName" name="Customer_Name_AR" class="mt-1" list="customerList" placeholder="ابحث عن العميل..." required />
-                <datalist id="customerList"></datalist>
-            </div>
+      <div id="clientVisitHistoryBox" class="bg-blue-50 p-6 rounded-xl border border-blue-300 hidden">
+        <h2 class="text-xl font-bold text-blue-800 mb-4">سجل زيارات العميل السابقـة</h2>
+        <div id="visitEntriesContainer" class="space-y-4 text-sm text-gray-700">
+          </div>
+      </div>
 
-            <div id="clientVisitHistoryBox" class="hidden bg-blue-50 p-4 rounded-lg mb-6 border border-blue-200">
-                <h3 class="text-lg font-semibold text-blue-800 mb-2">آخر 3 زيارات:</h3>
-                <ul id="clientHistoryList" class="list-disc pl-5 text-gray-700"></ul>
-            </div>
+      <div class="form-group">
+        <label for="customerType">نوع العميل</label>
+        <select id="customerType" name="Customer_Type" class="mt-1" required>
+          <option value="">اختر نوع العميل</option>
+          <option value="جملة">جملة</option>
+          <option value="تجزئة">تجزئة</option>
+        </select>
+      </div>
 
-            <div class="form-group">
-                <label for="visitType">نوع الزيارة</label>
-                <select id="visitType" name="Visit_Type_Name_AR" class="mt-1" required>
-                    <option value="">اختر نوع الزيارة</option>
-                </select>
-            </div>
+      <div class="form-group">
+        <label for="visitType">نوع الزيارة</label>
+        <select id="visitType" name="Visit_Type_Name_AR" class="mt-1" required>
+          <option value="">اختر نوع الزيارة</option>
+        </select>
+      </div>
 
-            <div id="normalVisitRelatedFields">
-                <div class="form-group">
-                    <label for="customerType">نوع العميل</label>
-                    <select id="customerType" name="Customer_Type" class="mt-1" required>
-                        <option value="">اختر نوع العميل</option>
-                        <option value="حلويات">حلويات 🍬</option>
-                        <option value="غذائية">غذائية 🍞</option>
-                        <option value="عام">عام 🛒</option>
-                    </select>
-                </div>
+      <div id="normalVisitRelatedFields" class="space-y-6">
+        <div class="form-group">
+          <label for="visitPurpose">الغرض من الزيارة</label>
+          <select id="visitPurpose" name="Visit_Purpose_AR" class="mt-1" required>
+            <option value="">اختر الغرض</option>
+          </select>
+        </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="form-group">
-                        <label for="visitPurpose">غرض الزيارة</label>
-                        <select id="visitPurpose" name="Visit_Purpose" class="mt-1" required>
-                            <option value="">اختر غرض الزيارة</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="visitOutcome">نتيجة الزيارة</label>
-                        <select id="visitOutcome" name="Visit_Outcome" class="mt-1" required>
-                            <option value="">اختر نتيجة الزيارة</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+        <div class="form-group">
+          <label for="visitOutcome">نتيجة الزيارة</label>
+          <select id="visitOutcome" name="Visit_Outcome_AR" class="mt-1" required>
+            <option value="">اختر النتيجة</option>
+          </select>
+        </div>
+      </div>
 
-            <div id="normalProductSection" class="product-selection-section bg-gray-50 p-6 rounded-xl border border-gray-200">
-                <h2 class="text-xl font-bold text-gray-700 mb-4">اختيار المنتجات حسب التصنيف</h2>
-                <div id="productCategories" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6"></div>
-                <div id="productsDisplay" class="space-y-4"></div>
-            </div>
+      <div id="normalProductSection" class="bg-green-50 p-6 rounded-xl border border-green-300">
+        <h2 class="text-xl font-bold text-green-800 mb-4">المنتجات المرتبطة بالزيارة</h2>
+        <div id="productCategories" class="mb-4 space-x-2 space-y-2">
+          </div>
+        <div id="productsDisplay" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          </div>
+      </div>
 
-            <div id="visitEntriesContainer" class="space-y-4"></div>
-            <div class="text-center mt-4 mb-6">
-                <button type="button" id="addVisitEntry" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">➕ إضافة زيارة جديدة</button>
-            </div>
+      <div id="inventorySection" class="bg-yellow-50 p-6 rounded-xl border border-yellow-300 hidden">
+        <h2 class="text-xl font-bold text-yellow-800 mb-4">قسم الجرد الاستثنائي</h2>
+        <datalist id="inventoryList"></datalist>
+        <div id="inventoryItemsContainer" class="space-y-4">
+          </div>
+        <div class="text-center mt-4">
+          <button type="button" id="addInventoryItem" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">➕ إضافة منتج جرد</button>
+        </div>
+      </div>
 
-            <div id="inventorySection" class="bg-yellow-50 p-6 rounded-xl border border-yellow-300 hidden">
-                <h2 class="text-xl font-bold text-yellow-800 mb-4">قسم الجرد الاستثنائي</h2>
-                <datalist id="inventoryList"></datalist>
-                <div id="inventoryItemsContainer" class="space-y-4">
-                    </div>
-                <div class="text-center mt-4">
-                    <button type="button" id="addInventoryItem" class="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium">➕ إضافة منتج جرد</button>
-                </div>
-            </div>
+      <div class="form-group">
+        <label for="notes">ملاحظات عامة</label>
+        <textarea id="notes" name="Notes" rows="3" class="mt-1" placeholder="أدخل الملاحظات..."></textarea>
+      </div>
 
-            <div class="form-group">
-                <label for="notes">ملاحظات عامة</label>
-                <textarea id="notes" name="Notes" rows="3" class="mt-1" placeholder="أدخل الملاحظات..."></textarea>
-            </div>
+      <div class="text-center mt-8">
+        <button type="submit" id="submitBtn" class="btn-primary">
+          إرسال البيانات
+          <span id="loadingSpinner" class="loading-spinner hidden"></span>
+        </button>
+      </div>
+    </form>
+  </div>
 
-            <div class="text-center mt-8">
-                <button type="submit" id="submitBtn" class="btn-primary">
-                    إرسال البيانات
-                    <span id="loadingSpinner" class="loading-spinner hidden"></span>
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
