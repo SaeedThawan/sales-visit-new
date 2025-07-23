@@ -32,99 +32,88 @@
 
       <div class="form-group">
         <label for="customerName">اسم العميل</label>
-        <input type="text" id="customerName" name="Customer_Name_AR" class="mt-1" list="customerList" required placeholder="ابحث عن اسم العميل" />
+        <input type="text" id="customerName" name="Customer_Name_AR" class="mt-1" list="customerList" required placeholder="ادخل اسم العميل او جزء منه" />
         <datalist id="customerList"></datalist>
       </div>
 
-      <div id="clientVisitHistoryBox" class="bg-blue-50 p-4 rounded-lg border border-blue-200 hidden">
-        <h3 class="text-lg font-bold text-blue-800 mb-2">سجل زيارات العميل السابقة</h3>
-        <div id="clientVisitHistoryContent" class="text-sm text-gray-700">
-          لا توجد زيارات سابقة لهذا العميل.
-        </div>
+      <div class="form-group">
+        <label for="customerType">نوع العميل</label>
+        <select id="customerType" name="Customer_Type" class="mt-1" required>
+          <option value="">اختر نوع العميل</option>
+          <option value="حلويات">حلويات</option>
+          <option value="غذائية">غذائية</option>
+          <option value="عام">عام</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label for="visitType">نوع الزيارة</label>
         <select id="visitType" name="Visit_Type_Name_AR" class="mt-1" required>
           <option value="">اختر نوع الزيارة</option>
-          <option value="زيارة عادية">زيارة عادية</option>
-          <option value="جرد استثنائي">جرد استثنائي</option>
         </select>
       </div>
 
-      <div id="normalVisitRelatedFields" class="space-y-6">
+      <div id="normalVisitRelatedFields" class="space-y-6 bg-blue-50 p-6 rounded-xl border border-blue-300">
+        <h2 class="text-xl font-bold text-blue-800 mb-4">بيانات الزيارة</h2>
         <div class="form-group">
           <label for="visitPurpose">الغرض من الزيارة</label>
-          <select id="visitPurpose" name="Visit_Purpose_Name_AR" class="mt-1" required>
+          <select id="visitPurpose" name="Visit_Purpose_Name_AR" class="mt-1">
             <option value="">اختر الغرض</option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="visitOutcome">نتيجة الزيارة</label>
-          <select id="visitOutcome" name="Visit_Outcome_Name_AR" class="mt-1" required>
+          <select id="visitOutcome" name="Visit_Outcome_Name_AR" class="mt-1">
             <option value="">اختر النتيجة</option>
           </select>
         </div>
 
         <div class="form-group">
-          <label for="customerType">نوع العميل</label>
-          <select id="customerType" name="Customer_Type" class="mt-1" required>
-            <option value="">اختر نوع العميل</option>
-            <option value="جملة">جملة</option>
-            <option value="تجزئة">تجزئة</option>
-          </select>
+          <label for="nextVisitDate">تاريخ الزيارة القادمة</label>
+          <input type="date" id="nextVisitDate" name="Next_Visit_Date" class="mt-1" />
         </div>
+      </div>
 
-        <div id="normalProductSection" class="bg-indigo-50 p-6 rounded-xl border border-indigo-300">
-          <h2 class="text-xl font-bold text-indigo-800 mb-4">المنتجات المرتبطة بالزيارة</h2>
-
-          <div id="productCategories" class="flex flex-wrap gap-3 mb-6">
-            </div>
-
-          <div id="productsDisplay" class="space-y-4">
-            </div>
-        </div>
-
+      <div id="normalProductSection" class="bg-green-50 p-6 rounded-xl border border-green-300">
+        <h2 class="text-xl font-bold text-green-800 mb-4">المنتجات المباعة/المطلوبة</h2>
+        <div id="productCategories" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          </div>
+        <div id="productsDisplay" class="space-y-4">
+          </div>
       </div>
 
       <div id="inventorySection" class="bg-yellow-50 p-6 rounded-xl border border-yellow-300 hidden">
         <h2 class="text-xl font-bold text-yellow-800 mb-4">قسم الجرد الاستثنائي</h2>
+        <datalist id="inventoryList"></datalist>
         <div id="inventoryItemsContainer" class="space-y-4">
-          <div class="inventory-item p-4 border border-gray-200 rounded-md relative bg-white shadow-sm">
-            <h3 class="font-semibold text-gray-700 mb-3">منتج الجرد #1</h3>
+          <div class="inventory-item p-4 border border-gray-300 rounded-lg relative bg-white shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-700 mb-3">منتج الجرد #1</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-group">
                 <label>اسم المنتج</label>
-                <input type="text" name="Inventory_Product_Name_AR" class="mt-1 product-search-input" list="inventoryList" placeholder="ابحث..." required />
-                <datalist id="inventoryList"></datalist>
-                <div class="product-details text-sm text-gray-600 mt-1">
-                  </div>
+                <input type="text" name="Inventory_Product_Name" class="w-full mt-1" list="inventoryList" placeholder="ابحث..." required />
               </div>
               <div class="form-group">
                 <label>الكمية</label>
-                <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required class="mt-1 text-lg p-2 w-full" style="height: 48px;" />
+                <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required />
               </div>
               <div class="form-group">
                 <label>تاريخ الانتهاء</label>
-                <input type="date" name="Expiration_Date" class="mt-1" />
+                <input type="date" name="Expiration_Date" class="w-full mt-1" />
               </div>
               <div class="form-group">
                 <label>الوحدة</label>
-                <select name="Unit_Label" class="mt-1" required>
+                <select name="Unit_Label" class="w-full mt-1" required>
                   <option value="">اختر الوحدة</option>
+                  <option value="باكت">باكت</option>
                   <option value="علبة">علبة</option>
                   <option value="شد">شد</option>
-                  <option value="باكت">باكت</option>
-                  <option value="كرتون">كرتون</option>
-                  <option value="جرام">جرام</option>
-                  <option value="ملي">ملي</option>
-                  <option value="لتر">لتر</option>
                 </select>
               </div>
               <div class="form-group">
                 <label>حالة المنتج</label>
-                <select name="Product_Condition" class="mt-1" required>
+                <select name="Product_Condition" class="w-full mt-1" required>
                   <option value="">اختر الحالة</option>
                   <option value="جيد">جيد</option>
                   <option value="تالف">تالف</option>
