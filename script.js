@@ -149,7 +149,6 @@ function populateCustomerTypes() {
     const option = document.createElement('option');
     option.value = type.TypeName; // أو ما يناسب اسم المفتاح في JSON الخاص بك
     option.textContent = type.TypeName;
-    customerTypeSelect.appendChild(option);
   });
 }
 */
@@ -528,4 +527,185 @@ async function handleSubmit(event) {
   try {
     const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'no-cors', // يتطلب هذا الوضع التعامل مع CORS من جانب Google Apps Script
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payloadToSend)
+    });
+
+    showSuccessMessage();
+    visitForm.reset();
+    clientVisitHistoryBox.classList.add('hidden');
+    productsDisplayDiv.innerHTML = ''; // Clear products
+    productCategoriesDiv.innerHTML = ''; // Clear categories (will be re-setup by initializeData)
+    inventoryItemsContainer.innerHTML = ''; // Clear inventory items
+    inventoryItemCounter = 0; // Reset inventory item counter
+    addInitialInventoryItem(); // Add back initial inventory item field
+    setupProductCategories(productsData); // Re-setup categories with all initially selected
+  } catch (err) {
+    console.error('خطأ أثناء الإرسال:', err);
+    showErrorMessage('حدث خطأ أثناء إرسال البيانات: ' + err.message);
+  } finally {
+    submitBtn.disabled = false;
+    loadingSpinner.classList.add('hidden');
+  }
+}
+
+// --------------------------------------------------
+// وظائف عرض الرسائل
+// --------------------------------------------------
+
+function showSuccessMessage() {
+  Swal.fire({
+    title: 'تم الإرسال بنجاح!',
+    text: 'تم تسجيل بيانات الزيارة/الجرد بنجاح.',
+    icon: 'success',
+    confirmButtonText: 'حسناً'
+  });
+}
+
+function showErrorMessage(message) {
+  Swal.fire({
+    title: 'خطأ!',
+    text: message || 'حدث خطأ ما.',
+    icon: 'error',
+    confirmButtonText: 'حسناً'
+  });
+}
+
+function showWarningMessage(message) {
+  Swal.fire({
+    title: 'تنبيه!',
+    text: message,
+    icon: 'warning',
+    confirmButtonText: 'حسناً'
+  });
+}
+
+// دالة لتجميع المنتجات المكررة في الجرد
+function consolidateInventoryItems(items) {
+  const consolidated = {};
+  items.forEach(item => {
+    // استخدم Product_Code, Expiration_Date, Unit_Label و Product_Condition كـ مفتاح لتجميع المنتجات
+    const key = `${item.Product_Code}-${item.Expiration_Date}-${item.Unit_Label}-${item.Product_Condition}`;
+    if (consolidated[key]) {
+      consolidated[key].Quantity += item.Quantity;
+      consolidated[key].Original_Quantities.push(item.Quantity); // إضافة الكمية الأصلية
+      // تحديث ملاحظة الدمج
+      consolidated[key].Merge_Note = consolidated[key].Original_Quantities.join('+');
+    } else {
+      consolidated[key] = { ...item };
+      // إذا لم يكن هناك ملاحظة دمج بعد، اجعلها فارغة مبدئياً
+      consolidated[key].Merge_Note = item.Original_Quantities.join('+'); // تبدأ بالملاحظة للكمية الأولى
+    }
+  });
+  return Object.values(consolidated);
+}
+
+// --------------------------------------------------
+// وظائف سجل الزيارات السابقة للعميل
+// --------------------------------------------------
+
+async function fetchClientVisitHistory(customerCode) {
+  // استخدام دالة doGet في Google Apps Script لجلب سجل الزيارات
+  try {
+    const url = `${GOOGLE_SHEETS_WEB_APP_URL}?context=history&client=${encodeURIComponent(customerCode)}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.visits || [];
+  } catch (error) {
+    console.error('Fetch client history error:', error);
+    showErrorMessage('حدث خطأ أثناء جلب سجل زيارات العميل: ' + error.message);
+    return [];
+  }
+}
+
+async function displayClientVisitHistory(customerCode) {
+  const history = await fetchClientVisitHistory(customerCode);
+  clientVisitHistoryContent.innerHTML = ''; // مسح السجل السابق
+
+  if (history && history.length > 0) {
+    // عرض آخر 3 زيارات
+    const latestVisits = history.slice(-3).reverse(); // الحصول على آخر 3 زيارات وعكس الترتيب ليكون الأحدث أولاً
+
+    latestVisits.forEach(record => {
+      const recordHtml = `
+        <div class="mb-2 p-2 border border-blue-100 rounded bg-blue-50">
+          <p><strong>التاريخ:</strong> ${record.Visit_Date || '—'}</p>
+          <p><strong>نوع الزيارة:</strong> ${record.Visit_Type_Name_AR || '-'}</p>
+          <p><strong>الغرض:</strong> ${record.Visit_Purpose || '-'}</p>
+          <p><strong>النتيجة:</strong> ${record.Visit_Outcome || '-'}</p>
+          ${record.Notes ? `<p><strong>ملاحظات:</strong> ${record.Notes}</p>` : ''}
+        </div>
+      `;
+      clientVisitHistoryContent.insertAdjacentHTML('beforeend', recordHtml);
+    });
+    clientVisitHistoryBox.classList.remove('hidden');
+  } else {
+    clientVisitHistoryContent.innerHTML = '<p class="text-gray-600">لا توجد زيارات سابقة لهذا العميل.</p>';
+    clientVisitHistoryBox.classList.remove('hidden'); // إظهار الصندوق حتى لو كان فارغاً مع رسالة
+  }
+}
+
+// --------------------------------------------------
+// الأحداث عند تحميل الصفحة
+// --------------------------------------------------
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadAllData().then(() => {
+    addInitialInventoryItem(); // إضافة أول حقل لمنتج الجرد بعد تحميل البيانات
+    // تأكد من أن الداتاليست يتم ملؤها بشكل صحيح عند التحميل الأولي
+    // عند التحميل الأولي، يجب أن تكون جميع الفئات محددة افتراضياً في مربعات الاختيار
+    const allCategories = Array.from(productCategoriesDiv.querySelectorAll('input[name="productCategoryFilter"]'))
+                               .map(cb => cb.value);
+    updateInventoryProductDatalists(allCategories);
+  });
+
+  visitForm.addEventListener('submit', handleSubmit); // ربط دالة الإرسال بحدث submit للنموذج
+
+  // ربط حدث التغيير لنوع الزيارة لتبديل الأقسام
+  visitTypeSelect.addEventListener('change', (event) => {
+    toggleVisitSections(event.target.value);
+  });
+
+  addInventoryItemBtn.addEventListener('click', addInventoryItem); // ربط زر إضافة منتج جرد
+
+  // تفويض الأحداث لأزرار الحذف لمنتجات الجرد (لأنها تُضاف ديناميكياً)
+  inventoryItemsContainer.addEventListener('click', (event) => {
+    if (event.target.classList.contains('removeInventoryItem')) {
+      // السماح بالحذف فقط إذا كان هناك أكثر من عنصر جرد واحد
+      if (inventoryItemsContainer.children.length > 1) {
+        event.target.closest('.inventory-item').remove();
+        // إعادة ترقيم العناصر المتبقية
+        document.querySelectorAll('.inventory-item h3').forEach((h3, index) => {
+          h3.textContent = `منتج الجرد #${index + 1}`;
+        });
+        inventoryItemCounter = inventoryItemsContainer.children.length; // تحديث العداد
+      } else {
+        showWarningMessage('يجب أن يحتوي قسم الجرد على منتج واحد على الأقل.');
+      }
+    }
+  });
+
+  // حدث التغيير على حقل اسم العميل لعرض سجل الزيارات
+  customerNameInput.addEventListener('change', async (event) => {
+    const customerName = event.target.value;
+    const selectedOption = Array.from(customerListDatalist.options).find(
+      option => option.value === customerName
+    );
+    if (selectedOption) {
+      const customerCode = selectedOption.getAttribute('data-code');
+      if (customerCode) {
+        await displayClientVisitHistory(customerCode);
+      } else {
+        clientVisitHistoryBox.classList.add('hidden');
+      }
+    } else {
+      clientVisitHistoryBox.classList.add('hidden');
+    }
+  });
+});
