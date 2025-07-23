@@ -151,19 +151,62 @@ function populateVisitTypes() {
 // ---------------------------------------------------
 
 function toggleVisitSections(selectedType) {
+  // Reset all 'required' attributes before setting them
+  // This is crucial to avoid "not focusable" errors
+  visitForm.querySelectorAll('[data-original-required]').forEach(field => {
+      if (field.dataset.originalRequired === 'true') {
+          field.setAttribute('required', 'required');
+      } else {
+          field.removeAttribute('required');
+      }
+      // Ensure hidden fields are disabled so they don't get validated
+      // by native browser validation
+      if (field.closest('.normal-visit-fields.hidden') || field.closest('.inventory-section.hidden')) {
+        field.disabled = true;
+      } else {
+        field.disabled = false;
+      }
+  });
+
+
   if (selectedType === 'جرد استثنائي') {
     normalVisitRelatedFieldsDiv.classList.add('hidden');
     normalProductSectionDiv.classList.add('hidden');
     inventorySectionDiv.classList.remove('hidden');
+
+    // Disable relevant fields from normal visit section
+    normalVisitRelatedFieldsDiv.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+    normalProductSectionDiv.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+    
     // مسح المنتجات العادية وخانات الاختيار عند التحول للجرد
     productsDisplayDiv.innerHTML = '';
     const checkboxes = productCategoriesDiv.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(cb => cb.checked = false);
+    checkboxes.forEach(cb => {
+        cb.checked = false;
+        cb.disabled = true; // Disable checkboxes when in inventory mode
+    });
+    
+    // Enable relevant fields in inventory section
+    inventorySectionDiv.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+
   } else {
     normalVisitRelatedFieldsDiv.classList.remove('hidden');
     normalProductSectionDiv.classList.remove('hidden');
     inventorySectionDiv.classList.add('hidden');
-    // التأكد من وجود حقل جرد واحد على الأقل عند العودة من الجرد
+
+    // Enable relevant fields from normal visit section
+    normalVisitRelatedFieldsDiv.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+    normalProductSectionDiv.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+    
+    const checkboxes = productCategoriesDiv.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        cb.disabled = false; // Enable checkboxes when in normal visit mode
+    });
+
+    // Disable relevant fields in inventory section
+    inventorySectionDiv.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+    
+    // التأكد من وجود حقل جرد واحد على الأقل عند العودة من الجرد (إذا كان فارغاً)
     if (inventoryItemsContainer.children.length === 0) {
       addInitialInventoryItem();
     }
@@ -196,13 +239,13 @@ function renderProductCategories() {
 
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
-    checkbox.id = `category-${category.replace(/\s/g, '-')}`;
+    checkbox.id = `category-${category.replace(/\s|\//g, '-')}`; // Replace spaces and slashes for valid ID
     checkbox.name = 'productCategory';
     checkbox.value = category;
     checkbox.classList.add('form-checkbox', 'h-5', 'w-5', 'text-indigo-600', 'mr-2'); // Tailwind classes for checkbox styling
 
-    // **مهم: جعل خانات الاختيار غير محددة تلقائيًا**
-    checkbox.checked = false; // هذا هو التغيير الأساسي هنا
+    // **مهم: جعل خانات الاختيار غير محددة تلقائيًا في البداية**
+    checkbox.checked = false;
 
     // ربط حدث التغيير لفلترة وعرض المنتجات
     checkbox.addEventListener('change', filterAndDisplayProducts);
@@ -252,11 +295,11 @@ function filterAndDisplayProducts() {
       <input type="hidden" name="Unit_Label" value="${product.Unit_Label || ''}" />
       <div class="flex items-center space-x-4">
         <label class="inline-flex items-center">
-          <input type="radio" name="Availability_${product.Product_Code}" value="متوفرة" class="form-radio text-green-600" required>
+          <input type="radio" name="Availability_${product.Product_Code}" value="متوفرة" class="form-radio text-green-600" data-original-required="true" />
           <span class="ml-2 text-gray-700">متوفرة</span>
         </label>
         <label class="inline-flex items-center">
-          <input type="radio" name="Availability_${product.Product_Code}" value="غير متوفرة" class="form-radio text-red-600" required>
+          <input type="radio" name="Availability_${product.Product_Code}" value="غير متوفرة" class="form-radio text-red-600" data-original-required="true" />
           <span class="ml-2 text-gray-700">غير متوفرة</span>
         </label>
       </div>
@@ -277,19 +320,18 @@ function addInitialInventoryItem() {
 }
 
 function addInventoryItem() {
-  const itemIndex = inventoryItemsContainer.children.length; // استخدام الطول الحالي كمؤشر
-
+  const itemIndex = Date.now(); // استخدام timestamp لضمان فرادة الـ ID
   const template = `
     <div class="inventory-item border border-gray-300 p-4 rounded-lg mb-4 bg-white relative shadow-sm">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="form-group">
           <label for="inventoryProductName_${itemIndex}">اسم المنتج</label>
-          <input type="text" id="inventoryProductName_${itemIndex}" name="Inventory_Product_Name_AR" list="inventoryProductList_${itemIndex}" placeholder="ابحث أو اختر المنتج..." required />
+          <input type="text" id="inventoryProductName_${itemIndex}" name="Inventory_Product_Name_AR" list="inventoryProductList_${itemIndex}" placeholder="ابحث أو اختر المنتج..." data-original-required="true" />
           <datalist id="inventoryProductList_${itemIndex}"></datalist>
         </div>
         <div class="form-group">
           <label>الكمية</label>
-          <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" required />
+          <input type="number" name="Inventory_Quantity" min="1" placeholder="أدخل الكمية" data-original-required="true" />
         </div>
         <div class="form-group">
           <label>تاريخ الانتهاء (اختياري)</label>
@@ -297,7 +339,7 @@ function addInventoryItem() {
         </div>
         <div class="form-group">
           <label>الوحدة</label>
-          <select name="Unit_Label" required>
+          <select name="Unit_Label" data-original-required="true">
             <option value="">اختر الوحدة</option>
             <option value="علبة">علبة</option>
             <option value="شد">شد</option>
@@ -307,6 +349,15 @@ function addInventoryItem() {
             <option value="مل">مل</option>
             <option value="لتر">لتر</option>
           </select>
+        </div>
+        <div class="form-group">
+            <label>حالة المنتج</label>
+            <select name="Product_Condition" data-original-required="true">
+                <option value="">اختر الحالة</option>
+                <option value="جيد">جيد</option>
+                <option value="تالف">تالف</option>
+                <option value="منتهي الصلاحية">منتهي الصلاحية</option>
+            </select>
         </div>
       </div>
       <button type="button" class="removeInventoryItem absolute top-2 left-2 text-red-600 text-sm">❌ حذف</button>
@@ -318,6 +369,9 @@ function addInventoryItem() {
   // تعبئة datalist للمنتج الجديد
   const newProductDatalist = newItem.querySelector(`#inventoryProductList_${itemIndex}`);
   populateInventoryProductDatalist(newProductDatalist);
+
+  // تحديث حالة الأقسام بعد إضافة عنصر جديد لضمان تفعيل/تعطيل الحقول بشكل صحيح
+  toggleVisitSections(visitTypeSelect.value);
 }
 
 function populateInventoryProductDatalist(datalistElement) {
@@ -330,80 +384,152 @@ function populateInventoryProductDatalist(datalistElement) {
 }
 
 // ---------------------------------------------------
-// إرسال البيانات
+// إرسال البيانات والتحقق من صحتها يدوياً
 // ---------------------------------------------------
 
 async function handleSubmit(event) {
-  event.preventDefault();
-  showLoadingSpinner();
+  event.preventDefault(); // منع الإرسال الافتراضي للمتصفح
 
-  const formData = new FormData(visitForm);
-  const data = {};
-
-  // جمع البيانات الأساسية للزيارة
-  for (let [key, value] of formData.entries()) {
-    data[key] = value;
+  // التحقق من الحقول الأساسية المشتركة
+  if (!salesRepNameSelect.value) {
+    showWarningMessage('الرجاء اختيار اسم المندوب.');
+    return;
+  }
+  if (!customerNameInput.value) {
+    showWarningMessage('الرجاء إدخال اسم العميل.');
+    return;
+  }
+  const selectedCustomer = customersMain.find(cust => cust.Customer_Name_AR === customerNameInput.value);
+  if (!selectedCustomer) {
+      showWarningMessage('الرجاء اختيار اسم عميل موجود من القائمة أو إدخال اسم صحيح.');
+      return;
+  }
+  if (!visitTypeSelect.value) {
+    showWarningMessage('الرجاء اختيار نوع الزيارة.');
+    return;
   }
 
-  // جمع بيانات المنتجات العادية (إذا كانت الزيارة ليست جرد استثنائي)
+  showLoadingSpinner();
+
+  const data = {};
+  data.Sales_Rep_Name = salesRepNameSelect.value;
+  data.Customer_Name_AR = customerNameInput.value;
+  data.Customer_Code = selectedCustomer.Customer_Code; // إضافة كود العميل
+  data.Visit_Type = visitTypeSelect.value;
+  data.Visit_Date = new Date().toLocaleDateString('en-CA'); // تاريخ اليوم YYYY-MM-DD
+  data.Visit_Time = new Date().toLocaleTimeString('en-US', { hour12: false }); // وقت الزيارة HH:MM:SS
+
+
   const selectedVisitType = visitTypeSelect.value;
+
   if (selectedVisitType !== 'جرد استثنائي') {
+    // التحقق من حقول الزيارة العادية
+    if (!visitPurposeSelect.value) {
+      showWarningMessage('الرجاء اختيار غرض الزيارة.');
+      hideLoadingSpinner();
+      return;
+    }
+    if (!visitOutcomeSelect.value) {
+      showWarningMessage('الرجاء اختيار نتيجة الزيارة.');
+      hideLoadingSpinner();
+      return;
+    }
+
+    data.Visit_Purpose = visitPurposeSelect.value;
+    data.Visit_Outcome = visitOutcomeSelect.value;
+
     const productItems = productsDisplayDiv.querySelectorAll('.product-item');
     data.Products = [];
-    productItems.forEach(item => {
-      const productName = item.querySelector('input[name="Product_Name_AR"]').value;
-      const productCode = item.querySelector('input[name="Product_Code"]').value;
-      const category = item.querySelector('input[name="Category"]').value;
-      const packageType = item.querySelector('input[name="Package_Type"]').value;
-      const unitSize = item.querySelector('input[name="Unit_Size"]').value;
-      const unitLabel = item.querySelector('input[name="Unit_Label"]').value;
-      const availabilityRadio = item.querySelector(`input[name="Availability_${productCode}"]:checked`);
-      
-      if (availabilityRadio) {
-          data.Products.push({
-              Product_Name_AR: productName,
-              Product_Code: productCode,
-              Category: category,
-              Package_Type: packageType,
-              Unit_Size: unitSize,
-              Unit_Label: unitLabel,
-              Availability: availabilityRadio.value // "متوفرة" أو "غير متوفرة"
-          });
-      }
-    });
+    
+    // التحقق من أن المستخدم اختار على الأقل فئة واحدة إذا كانت الزيارة ليست جرد استثنائي
+    const selectedCategories = Array.from(
+        productCategoriesDiv.querySelectorAll('input[name="productCategory"]:checked')
+    );
 
-    if (data.Products.length === 0 && selectedVisitType !== '') {
-        showWarningMessage('الرجاء اختيار فئة واحدة على الأقل وتحديد حالة توفر المنتجات.');
-        hideLoadingSpinner();
-        return;
+    if (selectedCategories.length > 0) { // فقط إذا تم اختيار فئات لعرض المنتجات
+        if (productItems.length === 0) {
+            showWarningMessage('الرجاء تحديد حالة توفر المنتجات في الفئات المختارة.');
+            hideLoadingSpinner();
+            return;
+        }
+        let allProductsAvailabilitySet = true;
+        productItems.forEach(item => {
+            const productName = item.querySelector('input[name="Product_Name_AR"]').value;
+            const productCode = item.querySelector('input[name="Product_Code"]').value;
+            const category = item.querySelector('input[name="Category"]').value;
+            const packageType = item.querySelector('input[name="Package_Type"]').value;
+            const unitSize = item.querySelector('input[name="Unit_Size"]').value;
+            const unitLabel = item.querySelector('input[name="Unit_Label"]').value;
+            // استخدام اسم الراديو الفريد لكل منتج
+            const availabilityRadio = item.querySelector(`input[name="Availability_${productCode}"]:checked`);
+            
+            if (!availabilityRadio) {
+                allProductsAvailabilitySet = false; // إذا لم يتم تحديد أي راديو لمنتج واحد
+            } else {
+                data.Products.push({
+                    Product_Name_AR: productName,
+                    Product_Code: productCode,
+                    Category: category,
+                    Package_Type: packageType,
+                    Unit_Size: unitSize,
+                    Unit_Label: unitLabel,
+                    Availability: availabilityRadio.value // "متوفرة" أو "غير متوفرة"
+                });
+            }
+        });
+
+        if (!allProductsAvailabilitySet) {
+            showWarningMessage('الرجاء تحديد حالة التوفر (متوفرة/غير متوفرة) لكل المنتجات المعروضة.');
+            hideLoadingSpinner();
+            return;
+        }
+    } else {
+        // إذا لم يتم اختيار أي فئات، يمكن إرسال الزيارة بدون منتجات
+        // ولكن فقط إذا لم يكن نوع الزيارة يتطلب منتجات (مثلاً زيارة مجاملة لا تتطلب منتجات)
+        // لا يوجد تحقق إضافي هنا طالما لم يتم عرض منتجات
     }
   } else {
-    // جمع بيانات منتجات الجرد الاستثنائي
+    // بيانات منتجات الجرد الاستثنائي
     const inventoryItems = inventoryItemsContainer.querySelectorAll('.inventory-item');
     data.Inventory_Products = [];
-    inventoryItems.forEach(item => {
-      const productName = item.querySelector('input[name="Inventory_Product_Name_AR"]').value;
-      const quantity = item.querySelector('input[name="Inventory_Quantity"]').value;
-      const expiryDate = item.querySelector('input[name="Expiration_Date"]').value;
-      const unitLabel = item.querySelector('select[name="Unit_Label"]').value;
 
-      // البحث عن Product_Code و Category من بيانات inventoryProductsData
-      const productDetail = inventoryProductsData.find(p => p.Product_Name_AR === productName);
-      
-      data.Inventory_Products.push({
-        Product_Name_AR: productName,
-        Product_Code: productDetail ? productDetail.Product_Code : 'N/A', // إضافة الكود
-        Category: productDetail ? productDetail.Category : 'N/A', // إضافة الفئة
-        Quantity: quantity,
-        Expiration_Date: expiryDate,
-        Unit_Label: unitLabel
-      });
-    });
-
-    if (data.Inventory_Products.length === 0 || !data.Inventory_Products[0].Product_Name_AR) {
+    if (inventoryItems.length === 0 || !inventoryItems[0].querySelector('input[name="Inventory_Product_Name_AR"]').value) {
       showWarningMessage('الرجاء إضافة منتج واحد على الأقل وتعبئة بياناته لقسم الجرد الاستثنائي.');
       hideLoadingSpinner();
       return;
+    }
+
+    let allInventoryFieldsValid = true;
+    inventoryItems.forEach(item => {
+      const productNameInput = item.querySelector('input[name="Inventory_Product_Name_AR"]');
+      const quantityInput = item.querySelector('input[name="Inventory_Quantity"]');
+      const expiryDateInput = item.querySelector('input[name="Expiration_Date"]');
+      const unitLabelSelect = item.querySelector('select[name="Unit_Label"]');
+      const productConditionSelect = item.querySelector('select[name="Product_Condition"]'); // حقل حالة المنتج
+
+      if (!productNameInput.value || !quantityInput.value || !unitLabelSelect.value || !productConditionSelect.value) {
+        allInventoryFieldsValid = false;
+        return; // الخروج من forEach
+      }
+      
+      // البحث عن Product_Code و Category من بيانات inventoryProductsData
+      const productDetail = inventoryProductsData.find(p => p.Product_Name_AR === productNameInput.value);
+      
+      data.Inventory_Products.push({
+        Product_Name_AR: productNameInput.value,
+        Product_Code: productDetail ? productDetail.Product_Code : 'N/A',
+        Category: productDetail ? productDetail.Category : 'N/A',
+        Quantity: quantityInput.value,
+        Expiration_Date: expiryDateInput.value,
+        Unit_Label: unitLabelSelect.value,
+        Product_Condition: productConditionSelect.value // إضافة حالة المنتج
+      });
+    });
+
+    if (!allInventoryFieldsValid) {
+        showWarningMessage('الرجاء تعبئة جميع الحقول المطلوبة لكل منتج جرد (اسم المنتج، الكمية، الوحدة، حالة المنتج).');
+        hideLoadingSpinner();
+        return;
     }
   }
 
@@ -426,7 +552,10 @@ async function handleSubmit(event) {
         toggleVisitSections(visitTypeSelect.value); // إخفاء الأقسام حسب نوع الزيارة المحددة
         productsDisplayDiv.innerHTML = ''; // مسح المنتجات المعروضة
         const checkboxes = productCategoriesDiv.querySelectorAll('input[type="checkbox"]');
-        checkboxes.forEach(cb => cb.checked = false); // إلغاء تحديد الفئات
+        checkboxes.forEach(cb => {
+            cb.checked = false; // إلغاء تحديد الفئات
+            cb.disabled = false; // إعادة تفعيل الخيارات (قد تكون معطلة في وضع الجرد)
+        }); 
         inventoryItemsContainer.innerHTML = ''; // مسح منتجات الجرد
         addInitialInventoryItem(); // إضافة حقل جرد مبدئي واحد
       } else {
@@ -450,6 +579,12 @@ async function handleSubmit(event) {
 
 document.addEventListener('DOMContentLoaded', () => {
   loadAllData(); // تحميل جميع البيانات الأولية
+
+  // تخزين حالة الـ `required` الأصلية للحقول في الـ HTML
+  visitForm.querySelectorAll('[required]').forEach(field => {
+    field.dataset.originalRequired = 'true';
+    field.removeAttribute('required'); // إزالة الـ `required` من الـ HTML لنقوم بالتحقق يدوياً
+  });
 
   // في البداية، اجعل قسم الجرد مخفيًا والقسم العادي مرئيًا
   // وهذا يضمن أن النموذج يبدأ بالوضع الافتراضي "زيارة بيع" أو أي شيء ليس "جرد استثنائي"
