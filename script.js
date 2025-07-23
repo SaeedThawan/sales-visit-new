@@ -8,7 +8,7 @@ let salesRepresentatives = [];
 let customersMain = [];
 let visitOutcomes = [];
 let visitPurposes = [];
-let visitTypes = [];
+let visitTypes = []; // تم إضافة هذا لتخزين أنواع الزيارات من JSON
 
 // الحصول على عناصر DOM الأساسية
 const visitForm = document.getElementById('visitForm');
@@ -18,6 +18,7 @@ const customerListDatalist = document.getElementById('customerList');
 const visitTypeSelect = document.getElementById('visitType');
 const visitPurposeSelect = document.getElementById('visitPurpose');
 const visitOutcomeSelect = document.getElementById('visitOutcome');
+const customerTypeSelect = document.getElementById('customerType'); // تم إضافة هذا لعنصر نوع العميل
 const productCategoriesDiv = document.getElementById('productCategories');
 const productsDisplayDiv = document.getElementById('productsDisplay');
 const submitBtn = document.getElementById('submitBtn');
@@ -61,7 +62,7 @@ async function loadAllData() {
     customers,
     outcomes,
     purposes,
-    types
+    types // تم تضمين أنواع الزيارات
   ] = await Promise.all([
     fetchData('products.json'),
     fetchData('inventory_products.json'),
@@ -69,7 +70,7 @@ async function loadAllData() {
     fetchData('customers_main.json'),
     fetchData('visit_outcomes.json'),
     fetchData('visit_purposes.json'),
-    fetchData('visit_types.json')
+    fetchData('visit_types.json') // جلب أنواع الزيارات
   ]);
 
   productsData = products || [];
@@ -78,14 +79,15 @@ async function loadAllData() {
   customersMain = customers || [];
   visitOutcomes = outcomes || [];
   visitPurposes = purposes || [];
-  visitTypes = types || [];
+  visitTypes = types || []; // تخزين أنواع الزيارات
 
   populateSalesReps();
-  populateVisitTypes();
+  populateVisitTypes(); // سيتم ملؤها من visit_types.json
   populateVisitPurposes();
   populateVisitOutcomes();
-  populateCustomerDatalist();
+  // populateCustomerTypes(); // إذا كان لديك ملف JSON لأنواع العملاء، ستكون هنا
   setupProductCategories(productsData); // استدعاء هذه الدالة بعد تحميل productsData
+  populateCustomerDatalist();
 }
 
 function populateSalesReps() {
@@ -110,12 +112,10 @@ function populateCustomerDatalist() {
 
 function populateVisitTypes() {
   visitTypeSelect.innerHTML = '<option value="">اختر نوع الزيارة</option>';
-  // إضافة خيارات الجرد والزيارة العادية بشكل صريح
-  const types = ['زيارة عادية', 'جرد استثنائي'];
-  types.forEach(type => {
+  visitTypes.forEach(type => { // استخدام visitTypes التي تم تحميلها من JSON
     const option = document.createElement('option');
-    option.value = type;
-    option.textContent = type;
+    option.value = type.Visit_Type_Name_AR;
+    option.textContent = type.Visit_Type_Name_AR;
     visitTypeSelect.appendChild(option);
   });
 }
@@ -140,6 +140,20 @@ function populateVisitOutcomes() {
   });
 }
 
+/*
+// إذا كان لديك ملف JSON لأنواع العملاء، قم بإلغاء التعليق عن هذه الدالة
+function populateCustomerTypes() {
+  customerTypeSelect.innerHTML = '<option value="">اختر نوع العميل</option>';
+  // افترض أن لديك متغير customersTypesData تم تحميله من JSON
+  customersTypesData.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type.TypeName; // أو ما يناسب اسم المفتاح في JSON الخاص بك
+    option.textContent = type.TypeName;
+    customerTypeSelect.appendChild(option);
+  });
+}
+*/
+
 // --------------------------------------------------
 // وظائف منطق النموذج
 // --------------------------------------------------
@@ -156,47 +170,54 @@ function toggleVisitSections(visitType) {
   }
 }
 
-// تهيئة فئات المنتجات كـ radio buttons
+// تهيئة فئات المنتجات كـ checkboxes
 function setupProductCategories(products) {
-  const categories = ['الكل']; // إضافة فئة "الكل"
+  const categories = [];
   products.forEach(p => {
     if (!categories.includes(p.Category)) {
       categories.push(p.Category);
     }
   });
 
+  // إنشاء مربعات اختيار لكل فئة
   productCategoriesDiv.innerHTML = categories.map(category => `
     <label class="inline-flex items-center mr-4 mb-2 cursor-pointer category-label">
-      <input type="radio" name="productCategory" value="${category}" class="form-radio h-4 w-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer" ${category === 'الكل' ? 'checked' : ''}>
+      <input type="checkbox" name="productCategoryFilter" value="${category}" class="form-checkbox h-4 w-4 text-indigo-600 focus:ring-indigo-500 cursor-pointer" checked>
       <span class="ml-2 text-gray-700">${category}</span>
     </label>
   `).join('');
 
-  // إضافة event listener لأزرار الراديو الخاصة بالفئات
-  productCategoriesDiv.querySelectorAll('input[name="productCategory"]').forEach(radio => {
-    radio.addEventListener('change', (event) => {
-      const selectedCategory = event.target.value;
-      // تحديث عرض المنتجات للزيارة العادية
-      displayProducts(productsData, selectedCategory === 'الكل' ? null : selectedCategory);
+  // إضافة event listener لمربعات الاختيار الخاصة بالفئات
+  productCategoriesDiv.querySelectorAll('input[name="productCategoryFilter"]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      // جمع جميع الفئات المختارة حالياً
+      const selectedCategories = Array.from(productCategoriesDiv.querySelectorAll('input[name="productCategoryFilter"]:checked'))
+                                    .map(cb => cb.value);
+      
+      // تحديث عرض المنتجات للزيارة العادية بناءً على الفئات المختارة
+      displayProducts(productsData, selectedCategories);
       // تحديث داتاليست منتجات الجرد
-      updateInventoryProductDatalists(selectedCategory === 'الكل' ? null : selectedCategory);
+      updateInventoryProductDatalists(selectedCategories);
     });
   });
 
-  // عرض المنتجات الأولية بناءً على الفئة الافتراضية "الكل"
-  displayProducts(productsData);
+  // عرض المنتجات الأولية (كلها في البداية)
+  displayProducts(productsData, categories); // اعرض كل المنتجات افتراضيا عند التحميل
 }
 
-function displayProducts(products, selectedCategory = null) {
+// تعديل displayProducts لعرض المنتجات من فئات متعددة
+function displayProducts(products, selectedCategories = []) {
   productsDisplayDiv.innerHTML = ''; // مسح المنتجات المعروضة سابقاً
 
   let productsToDisplay = products;
-  if (selectedCategory) {
-    productsToDisplay = products.filter(p => p.Category === selectedCategory);
+
+  if (selectedCategories && selectedCategories.length > 0) {
+      productsToDisplay = products.filter(p => selectedCategories.includes(p.Category));
   }
+  // إذا كانت selectedCategories فارغة (أي لا توجد فئات محددة)، فسيتم عرض جميع المنتجات تلقائياً لأننا لم نقم بفلترة.
 
   if (productsToDisplay.length === 0) {
-    productsDisplayDiv.innerHTML = '<p class="text-gray-500">لا توجد منتجات لعرضها في هذه الفئة.</p>';
+    productsDisplayDiv.innerHTML = '<p class="text-gray-500">لا توجد منتجات لعرضها في الفئات المختارة.</p>';
     return;
   }
 
@@ -312,9 +333,9 @@ function addInventoryItem() {
   setupInventoryProductSearch(newProductInput, currentDatalistId);
 
   // تحديث داتاليست العنصر الجديد بناءً على الفئة المحددة حالياً
-  const selectedCategoryRadio = productCategoriesDiv.querySelector('input[name="productCategory"]:checked');
-  const selectedCategory = selectedCategoryRadio ? selectedCategoryRadio.value : 'الكل';
-  updateInventoryProductDatalists(selectedCategory === 'الكل' ? null : selectedCategory);
+  const selectedCategoryRadios = productCategoriesDiv.querySelectorAll('input[name="productCategoryFilter"]:checked');
+  const selectedCategories = Array.from(selectedCategoryRadios).map(cb => cb.value);
+  updateInventoryProductDatalists(selectedCategories);
 }
 
 function setupInventoryProductSearch(inputElement, datalistId) {
@@ -342,15 +363,19 @@ function setupInventoryProductSearch(inputElement, datalistId) {
   });
 }
 
-function updateInventoryProductDatalists(selectedCategory = null) {
+// تعديل updateInventoryProductDatalists لتأخذ مصفوفة من الفئات
+function updateInventoryProductDatalists(selectedCategories = []) {
   // تحديث جميع داتاليست منتجات الجرد الموجودة في النموذج
   const allInventoryDatalists = inventoryItemsContainer.querySelectorAll('datalist');
 
   allInventoryDatalists.forEach(datalist => {
     let filteredProducts = inventoryProductsData;
-    if (selectedCategory) {
-      filteredProducts = inventoryProductsData.filter(product => product.Category === selectedCategory);
+
+    // إذا تم اختيار فئات، قم بالفلترة
+    if (selectedCategories && selectedCategories.length > 0) {
+      filteredProducts = inventoryProductsData.filter(product => selectedCategories.includes(product.Category));
     }
+    // إذا كانت selectedCategories فارغة، فسيتم عرض جميع المنتجات تلقائياً.
 
     datalist.innerHTML = filteredProducts.map(product =>
       `<option value="${product.Product_Name_AR}" data-product-code="${product.Product_Code}" data-category="${product.Category}" data-package-type="${product.Package_Type}" data-unit-size="${product.Unit_Size}" data-unit-label="${product.Unit_Label}"></option>`
@@ -466,7 +491,7 @@ async function handleSubmit(event) {
       ...commonData,
       Visit_Purpose_Name_AR: formData.get('Visit_Purpose_Name_AR'),
       Visit_Outcome_Name_AR: formData.get('Visit_Outcome_Name_AR'),
-      Customer_Type: formData.get('Customer_Type'),
+      Customer_Type: formData.get('Customer_Type'), // الآن يتم جلب قيمة نوع العميل من النموذج
       Available_Products_Names: '', // سيتم ملؤها لاحقاً
       Unavailable_Products_Names: '' // سيتم ملؤها لاحقاً
     };
@@ -503,182 +528,4 @@ async function handleSubmit(event) {
   try {
     const response = await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
       method: 'POST',
-      mode: 'no-cors', // يتطلب هذا الوضع التعامل مع CORS من جانب Google Apps Script
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payloadToSend)
-    });
-
-    showSuccessMessage();
-    visitForm.reset();
-    clientVisitHistoryBox.classList.add('hidden');
-    productsDisplayDiv.innerHTML = ''; // Clear products
-    productCategoriesDiv.innerHTML = ''; // Clear categories (will be re-setup by initializeData)
-    inventoryItemsContainer.innerHTML = ''; // Clear inventory items
-    inventoryItemCounter = 0; // Reset inventory item counter
-    addInitialInventoryItem(); // Add back initial inventory item field
-    setupProductCategories(productsData); // Re-setup categories
-  } catch (err) {
-    console.error('خطأ أثناء الإرسال:', err);
-    showErrorMessage('حدث خطأ أثناء إرسال البيانات: ' + err.message);
-  } finally {
-    submitBtn.disabled = false;
-    loadingSpinner.classList.add('hidden');
-  }
-}
-
-// --------------------------------------------------
-// وظائف عرض الرسائل
-// --------------------------------------------------
-
-function showSuccessMessage() {
-  Swal.fire({
-    title: 'تم الإرسال بنجاح!',
-    text: 'تم تسجيل بيانات الزيارة/الجرد بنجاح.',
-    icon: 'success',
-    confirmButtonText: 'حسناً'
-  });
-}
-
-function showErrorMessage(message) {
-  Swal.fire({
-    title: 'خطأ!',
-    text: message || 'حدث خطأ ما.',
-    icon: 'error',
-    confirmButtonText: 'حسناً'
-  });
-}
-
-function showWarningMessage(message) {
-  Swal.fire({
-    title: 'تنبيه!',
-    text: message,
-    icon: 'warning',
-    confirmButtonText: 'حسناً'
-  });
-}
-
-// دالة لتجميع المنتجات المكررة في الجرد
-function consolidateInventoryItems(items) {
-  const consolidated = {};
-  items.forEach(item => {
-    // استخدم Product_Code, Expiration_Date, Unit_Label و Product_Condition كـ مفتاح لتجميع المنتجات
-    const key = `${item.Product_Code}-${item.Expiration_Date}-${item.Unit_Label}-${item.Product_Condition}`;
-    if (consolidated[key]) {
-      consolidated[key].Quantity += item.Quantity;
-      consolidated[key].Original_Quantities.push(item.Quantity); // إضافة الكمية الأصلية
-      // تحديث ملاحظة الدمج
-      consolidated[key].Merge_Note = consolidated[key].Original_Quantities.join('+');
-    } else {
-      consolidated[key] = { ...item };
-      // إذا لم يكن هناك ملاحظة دمج بعد، اجعلها فارغة مبدئياً
-      consolidated[key].Merge_Note = item.Original_Quantities.join('+'); // تبدأ بالملاحظة للكمية الأولى
-    }
-  });
-  return Object.values(consolidated);
-}
-
-// --------------------------------------------------
-// وظائف سجل الزيارات السابقة للعميل
-// --------------------------------------------------
-
-async function fetchClientVisitHistory(customerCode) {
-  // استخدام دالة doGet في Google Apps Script لجلب سجل الزيارات
-  try {
-    const url = `${GOOGLE_SHEETS_WEB_APP_URL}?context=history&client=${encodeURIComponent(customerCode)}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data.visits || [];
-  } catch (error) {
-    console.error('Fetch client history error:', error);
-    showErrorMessage('حدث خطأ أثناء جلب سجل زيارات العميل: ' + error.message);
-    return [];
-  }
-}
-
-async function displayClientVisitHistory(customerCode) {
-  const history = await fetchClientVisitHistory(customerCode);
-  clientVisitHistoryContent.innerHTML = ''; // مسح السجل السابق
-
-  if (history && history.length > 0) {
-    // عرض آخر 3 زيارات
-    const latestVisits = history.slice(-3).reverse(); // الحصول على آخر 3 زيارات وعكس الترتيب ليكون الأحدث أولاً
-
-    latestVisits.forEach(record => {
-      const recordHtml = `
-        <div class="mb-2 p-2 border border-blue-100 rounded bg-blue-50">
-          <p><strong>التاريخ:</strong> ${record.Visit_Date || '—'}</p>
-          <p><strong>نوع الزيارة:</strong> ${record.Visit_Type_Name_AR || '-'}</p>
-          <p><strong>الغرض:</strong> ${record.Visit_Purpose || '-'}</p>
-          <p><strong>النتيجة:</strong> ${record.Visit_Outcome || '-'}</p>
-          ${record.Notes ? `<p><strong>ملاحظات:</strong> ${record.Notes}</p>` : ''}
-        </div>
-      `;
-      clientVisitHistoryContent.insertAdjacentHTML('beforeend', recordHtml);
-    });
-    clientVisitHistoryBox.classList.remove('hidden');
-  } else {
-    clientVisitHistoryContent.innerHTML = '<p class="text-gray-600">لا توجد زيارات سابقة لهذا العميل.</p>';
-    clientVisitHistoryBox.classList.remove('hidden'); // إظهار الصندوق حتى لو كان فارغاً مع رسالة
-  }
-}
-
-// --------------------------------------------------
-// الأحداث عند تحميل الصفحة
-// --------------------------------------------------
-
-document.addEventListener('DOMContentLoaded', () => {
-  loadAllData().then(() => {
-    addInitialInventoryItem(); // إضافة أول حقل لمنتج الجرد بعد تحميل البيانات
-    // تأكد من أن الداتاليست يتم ملؤها بشكل صحيح عند التحميل الأولي
-    updateInventoryProductDatalists(null); // ملء جميع الداتاليست بالمنتجات كلها في البداية
-  });
-
-  visitForm.addEventListener('submit', handleSubmit); // ربط دالة الإرسال بحدث submit للنموذج
-
-  // ربط حدث التغيير لنوع الزيارة لتبديل الأقسام
-  visitTypeSelect.addEventListener('change', (event) => {
-    toggleVisitSections(event.target.value);
-  });
-
-  addInventoryItemBtn.addEventListener('click', addInventoryItem); // ربط زر إضافة منتج جرد
-
-  // تفويض الأحداث لأزرار الحذف لمنتجات الجرد (لأنها تُضاف ديناميكياً)
-  inventoryItemsContainer.addEventListener('click', (event) => {
-    if (event.target.classList.contains('removeInventoryItem')) {
-      // السماح بالحذف فقط إذا كان هناك أكثر من عنصر جرد واحد
-      if (inventoryItemsContainer.children.length > 1) {
-        event.target.closest('.inventory-item').remove();
-        // إعادة ترقيم العناصر المتبقية
-        document.querySelectorAll('.inventory-item h3').forEach((h3, index) => {
-          h3.textContent = `منتج الجرد #${index + 1}`;
-        });
-        inventoryItemCounter = inventoryItemsContainer.children.length; // تحديث العداد
-      } else {
-        showWarningMessage('يجب أن يحتوي قسم الجرد على منتج واحد على الأقل.');
-      }
-    }
-  });
-
-  // حدث التغيير على حقل اسم العميل لعرض سجل الزيارات
-  customerNameInput.addEventListener('change', async (event) => {
-    const customerName = event.target.value;
-    const selectedOption = Array.from(customerListDatalist.options).find(
-      option => option.value === customerName
-    );
-    if (selectedOption) {
-      const customerCode = selectedOption.getAttribute('data-code');
-      if (customerCode) {
-        await displayClientVisitHistory(customerCode);
-      } else {
-        clientVisitHistoryBox.classList.add('hidden');
-      }
-    } else {
-      clientVisitHistoryBox.classList.add('hidden');
-    }
-  });
-});
+      mode: 'no-cors',
